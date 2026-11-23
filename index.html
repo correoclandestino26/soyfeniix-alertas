@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoyFeniix | Prueba de alertas</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #101014;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    main {
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #ff7900;
+      letter-spacing: 3px;
+    }
+
+    p {
+      color: #aaa;
+    }
+
+    .escenario {
+      height: 300px;
+      margin: 30px 0;
+      background: #08080c;
+      border: 1px solid #444;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .mensaje {
+      font-size: clamp(22px, 5vw, 42px);
+      font-weight: bold;
+      opacity: 0;
+      padding: 20px;
+      text-shadow: 0 0 25px currentColor;
+    }
+
+    .follow {
+      color: #ff7900;
+      animation: aparecer 2.5s ease-in-out forwards;
+    }
+
+    .sub {
+      color: #b67aff;
+      animation: subir 2.5s ease-in-out forwards;
+    }
+
+    .bits {
+      color: #ffffff;
+      animation: girar 2.5s ease-in-out forwards;
+    }
+
+    @keyframes aparecer {
+      0% {
+        opacity: 0;
+        transform: scale(0.2);
+      }
+      35%, 75% {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.4);
+      }
+    }
+
+    @keyframes subir {
+      0% {
+        opacity: 0;
+        transform: translateY(100px);
+      }
+      35%, 75% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-100px);
+      }
+    }
+
+    @keyframes girar {
+      0% {
+        opacity: 0;
+        transform: rotate(-180deg) scale(0.2);
+      }
+      40%, 75% {
+        opacity: 1;
+        transform: rotate(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: rotate(180deg) scale(0.2);
+      }
+    }
+
+    .botones {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: #ff7900;
+      color: #111;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 8px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #ffaa44;
+    }
+
+    button:focus-visible {
+      outline: 3px solid white;
+      outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .mensaje {
+        animation: none !important;
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>SOYFENIIX</h1>
+    <p>Laboratorio de alertas | Prueba de funcionamiento</p>
+
+    <div class="escenario" id="escenario">
+      <p>Selecciona una alerta para probarla.</p>
+    </div>
+
+    <div class="botones">
+      <button onclick="probar('follow')">Follow</button>
+      <button onclick="probar('sub')">Sub</button>
+      <button onclick="probar('bits')">Bits</button>
+    </div>
+  </main>
+
+  <script>
+    function probar(tipo) {
+      const escenario = document.getElementById("escenario");
+
+      const mensajes = {
+        follow: "¡NUEVO FOLLOW!",
+        sub: "¡NUEVA SUSCRIPCIÓN!",
+        bits: "¡GRACIAS POR LOS BITS!"
+      };
+
+      escenario.innerHTML = "";
+
+      const mensaje = document.createElement("div");
+      mensaje.className = "mensaje " + tipo;
+      mensaje.textContent = mensajes[tipo];
+
+      escenario.appendChild(mensaje);
+    }
+  </script>
+</body>
+</html>

@@ -68,10 +68,9 @@ p{color:#aaa}
 </div>
 
 <button onclick="play('follow')">FOLLOW</button>
-<button onclick="play('sub')">SUB</button>
-<button onclick="play('bits')">BITS</button>
 
-<p>Prototipo experimental de animaciones</p>
+
+<p>Prueba de alerta Follow</p>
 </main>
 
 <script>
@@ -80,7 +79,7 @@ const ctx=canvas.getContext("2d");
 const message=document.getElementById("message");
 const subtitle=document.getElementById("subtitle");
 
-let w,h,particles=[],bolts=[];
+let w,h,particles=[],bolts=[],rings=[];
 let start=0,active=false,runId=0;
 
 function resize(){
@@ -97,17 +96,21 @@ function random(a,b){
 
 function particle(){
  const angle=random(0,Math.PI*2);
- const radius=random(10,120)*w/900;
+ const radius=random(15,180)*w/900;
  return {
  x:w/2+Math.cos(angle)*radius,
  y:h/2+Math.sin(angle)*radius,
  vx:random(-2,2)*w/900,
- vy:random(-3,-.5)*h/506,
+ vy:random(-4,-.8)*h/506,
  life:random(30,90),
  max:90,
- size:random(1,3)*w/900,
+ size:random(.5,2.4)*w/900,
  color:Math.random()<.7?25:275
  };
+}
+
+function arcRing(){
+ rings.push({radius:random(12,35)*w/900,life:35,max:35,angle:random(0,6.28)});
 }
 
 function lightning(){
@@ -156,11 +159,23 @@ function animate(time){
   ctx.fillRect(0,0,w,h);
 
   if(elapsed<5200){
-   for(let i=0;i<5;i++)
+   for(let i=0;i<9;i++)
     particles.push(particle());
-   if(Math.random()<.45)lightning();
+   if(Math.random()<.68)lightning();
+   if(Math.random()<.12)arcRing();
   }
 
+  rings=rings.filter(r=>r.life-->0);
+  for(const r of rings){
+   r.radius+=5*w/900;
+   const a=r.life/r.max*fade;
+   ctx.beginPath();
+   ctx.ellipse(w/2,h/2,r.radius,r.radius*.57,r.angle,0,Math.PI*2);
+   ctx.strokeStyle='rgba(186,85,255,'+a*.55+')';
+   ctx.lineWidth=2*w/900;
+   ctx.shadowColor='#b34bff';ctx.shadowBlur=22*w/900;
+   ctx.stroke();
+  }
   particles=particles.filter(p=>p.life-->0);
 
   for(const p of particles){
@@ -175,6 +190,10 @@ function animate(time){
    ctx.shadowBlur=18*w/900;
    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
    ctx.fill();
+   ctx.beginPath();ctx.moveTo(p.x,p.y);
+   ctx.lineTo(p.x-p.vx*3,p.y-p.vy*3);
+   ctx.lineWidth=Math.max(.5,p.size*.6);
+   ctx.strokeStyle=ctx.fillStyle;ctx.stroke();
   }
 
   bolts=bolts.filter(b=>b.life-->0);
@@ -193,6 +212,9 @@ function animate(time){
     b.color===25?"#ff7428":"#a353ff";
    ctx.shadowBlur=22*w/900;
    ctx.stroke();
+   ctx.lineWidth=.65*w/900;
+   ctx.strokeStyle='rgba(255,245,255,'+(b.life/11*fade*.85)+')';
+   ctx.shadowBlur=4*w/900;ctx.stroke();
   }
 
   ctx.shadowBlur=0;
@@ -211,23 +233,18 @@ function play(type){
  const id=++runId;
  particles=[];
  bolts=[];
+ rings=[];
  active=true;
  start=performance.now();
 
  message.classList.remove("show");
  subtitle.classList.remove("show");
 
- const messages={
-  follow:"¡NUEVO FOLLOW!",
-  sub:"¡NUEVA SUSCRIPCIÓN!",
-  bits:"¡GRACIAS POR LOS BITS!"
- };
+ const messages={follow:"¡NUEVO FOLLOW!"};
 
  message.textContent=messages[type];
  subtitle.textContent=
-  type==="follow"
-  ?"LA ENERGÍA DESPIERTA"
-  :"SOYFENIIX";
+  "LA ENERGÍA DESPIERTA";
 
  setTimeout(()=>{
   if(id!==runId)return;

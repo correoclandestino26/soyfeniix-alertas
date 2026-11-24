@@ -22,7 +22,44 @@ function ember(x,y,size,heat,alpha,seed,age){
   if(size>1.8){g.fillStyle='#461d11';g.globalAlpha*=.62;g.fillRect(-w*.1,size*.2,w*.62,size*.23);}
   g.restore();
 }
-function eye(x,y,open,a){g.save();g.translate(x,y);g.scale(1,Math.max(.035,open));g.globalAlpha*=a;glow(0,0,28,'#db761e55');g.beginPath();g.moveTo(-15,-1);g.quadraticCurveTo(0,-12,15,-2);g.quadraticCurveTo(1,11,-15,-1);g.fillStyle='#29130d';g.fill();g.strokeStyle='#ffb064';g.lineWidth=.8;g.stroke();g.save();g.clip();let z=g.createRadialGradient(-2,-2,0,0,0,10);z.addColorStop(0,'#fff6b6');z.addColorStop(.5,'#e5a546');z.addColorStop(1,'#a64d19');g.fillStyle=z;g.beginPath();g.ellipse(0,0,8,8,0,0,Math.PI*2);g.fill();g.fillStyle='#140e0b';g.beginPath();g.ellipse(1,0,2,8,0,0,Math.PI*2);g.fill();g.fillStyle='#fff5db';g.fillRect(-3,-4,2,2);g.restore();g.restore()}
+// Detailed, shaded feline eyes, cached at high resolution.
+const catEyeSprites=new Map();
+function eye(x,y,open,a){
+ const side=x<0?1:-1;
+ if(!catEyeSprites.has(side)){
+  const cv=document.createElement('canvas');cv.width=240;cv.height=144;const h=cv.getContext('2d');
+  h.scale(6,6);h.translate(20,12);h.scale(side,1);
+  const aperture=()=>{h.beginPath();h.moveTo(-15,-1.1);h.bezierCurveTo(-10,-8.7,1,-9.0,10,-5.4);h.quadraticCurveTo(13.5,-3.3,15,.6);h.bezierCurveTo(8,6.6,-6,7.3,-15,-1.1);h.closePath()};
+  // Restrained eye socket and fine ginger hairs merging into the darkness.
+  const socket=h.createRadialGradient(0,0,5,0,0,19);socket.addColorStop(0,'#23170ee8');socket.addColorStop(.6,'#442717b0');socket.addColorStop(1,'#38201100');h.fillStyle=socket;h.fillRect(-20,-12,40,24);
+  for(let k=0;k<420;k++){
+   const sd=k*53+173,px=(r(sd)-.5)*37,py=(r(sd+1)-.5)*22;
+   if(Math.abs(py)<4.9&&Math.abs(px)<14)continue;
+   const fall=cl(1-Math.hypot(px/20,py/12)),len=.7+r(sd+2)*2.1;
+   h.globalAlpha=fall*(.12+r(sd+3)*.55);h.strokeStyle=['#4e2917','#b77d43','#e2b071','#20140e'][k%4];h.lineWidth=.12+r(sd+4)*.14;
+   h.beginPath();h.moveTo(px,py);h.quadraticCurveTo(px+len*.4,py+Math.sign(py)*len*.6,px+len*.85,py+Math.sign(py)*len*.85);h.stroke();
+  }h.globalAlpha=1;
+  aperture();h.fillStyle='#211a13';h.fill();h.save();h.clip();
+  const ix=.2,iy=-.6,rad=9.6;
+  const z=h.createRadialGradient(ix,iy,1,ix,iy,rad);
+  z.addColorStop(0,'#594022');z.addColorStop(.28,'#a37a31');z.addColorStop(.54,'#c6a151');z.addColorStop(.79,'#928041');z.addColorStop(.94,'#534825');z.addColorStop(1,'#211d13');
+  h.fillStyle=z;h.beginPath();h.arc(ix,iy,rad,0,Math.PI*2);h.fill();
+  // Natural radial iris fibers, crypts and irregular pigment.
+  for(let k=0;k<250;k++){
+   const sd=k*43+171,th=k*Math.PI*2/250+(r(sd)-.5)*.04,ri=1.8+r(sd+1)*4.8,ro=7.2+r(sd+2)*2.4,wig=(r(sd+3)-.5)*.15;
+   h.beginPath();h.moveTo(ix+Math.cos(th)*ri,iy+Math.sin(th)*ri);h.quadraticCurveTo(ix+Math.cos(th+wig)*(ri+ro)/2,iy+Math.sin(th+wig)*(ri+ro)/2,ix+Math.cos(th)*ro,iy+Math.sin(th)*ro);
+   h.strokeStyle=['#f4ce8275','#51381985','#c2ab6570','#76682d70'][k%4];h.lineWidth=.10+r(sd+4)*.18;h.stroke();
+  }
+  h.beginPath();h.moveTo(ix,iy-9);h.bezierCurveTo(ix+1.1,iy-5.4,ix+2.35,iy-2.6,ix+2.1,iy);h.bezierCurveTo(ix+2,iy+4.1,ix+.8,iy+7.1,ix,iy+9);h.bezierCurveTo(ix-1.2,iy+5.4,ix-2.25,iy+2.1,ix-2.05,iy);h.bezierCurveTo(ix-1.9,iy-4.4,ix-.65,iy-7.2,ix,iy-9);h.closePath();h.fillStyle='#100e0b';h.fill();
+  const lid=h.createLinearGradient(0,-8,0,7);lid.addColorStop(0,'#100a08e0');lid.addColorStop(.34,'#25190c16');lid.addColorStop(.7,'#1a110a00');lid.addColorStop(1,'#19110bab');h.fillStyle=lid;h.fillRect(-16,-9,32,18);
+  h.fillStyle='#f8eee0ba';h.beginPath();h.ellipse(-3.1,-3.6,1.2,.47,-.35,0,Math.PI*2);h.fill();
+  h.fillStyle='#f4d5a86b';h.beginPath();h.ellipse(3.1,2.9,.49,.23,0,0,Math.PI*2);h.fill();h.restore();
+  h.beginPath();h.moveTo(-15,-1.1);h.bezierCurveTo(-10,-8.7,1,-9.0,10,-5.4);h.quadraticCurveTo(13.5,-3.3,15,.6);h.strokeStyle='#170f0b';h.lineWidth=.95;h.stroke();
+  h.beginPath();h.moveTo(-14.4,-.8);h.bezierCurveTo(-6,7.1,8,6.4,14.5,.8);h.strokeStyle='#b082545e';h.lineWidth=.45;h.stroke();
+  catEyeSprites.set(side,cv);
+ }
+ g.save();g.translate(x,y);g.scale(1,Math.max(.035,open));g.globalAlpha*=a;g.drawImage(catEyeSprites.get(side),-20,-12,40,24);g.restore();
+}
 function txt(text,x,y,sz,weight,color,spacing=0){g.font=`${weight} ${sz}px system-ui,sans-serif`;g.textAlign='left';g.textBaseline='middle';g.fillStyle=color;g.letterSpacing=spacing+'px';g.fillText(text,x,y);g.letterSpacing='0px'}
 function frame(now){requestAnimationFrame(frame);g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);if(start<0||!ready)return;let t=(now-start)/1000;if(t>D){start=-1;b.disabled=false;return}let s=Math.min(c.width/W,c.height/H);g.translate((c.width-W*s)/2,(c.height-H*s)/2);g.scale(s,s);let end=cl((D-t)/.65),build=smooth((t-.26)/1.35),fade=1-smooth((t-FIRE)/1.5),breath=Math.sin(t*2.1)*1.5;g.globalAlpha=end;glow(ax+60,ay+190,220,'#347fff2b',build*fade*(1-smooth((t-(FIRE-.3))/.3)));glow(ax+60,ay+355,150,'#ff5c202a',smooth((t-FIRE)/.3)*fade); // Dark local contrast, no opaque panel
 let textIn=smooth((t-2.7)/.48),textOut=1-smooth((t-7.3)/.8);if(textIn){g.save();g.globalAlpha*=textIn*textOut;g.translate(0,0);g.scale(1,.46);glow(615,600,350,'#090b14a0');g.restore()}
@@ -63,46 +100,51 @@ if(ca>0){
  g.save();g.globalAlpha*=ca;g.font='650 19px system-ui,sans-serif';g.letterSpacing='0px';
  let cx=466+g.measureText('N U E V O   F O L L O W').width+77+(1-ease((t-2.7)/.6))*20;
  g.translate(cx,225);g.scale(1.75,1.75);glow(0,0,52,'#10090f88');
- // Softly articulated ginger tail; its root is concealed behind the eye line.
- g.save();
- g.beginPath();g.rect(-100,-125,200,122);g.clip();
- const ta=t-2.7, w1=Math.sin(ta*2.25),w2=Math.sin(ta*2.25-.85);
- const pts=[],left=[],right=[];
- for(let j=0;j<=64;j++){
-  const u=j/64,v=1-u;
-  const x=v*v*v*14+3*v*v*u*(24+w1*3)+3*v*u*u*(45+w1*10)+u*u*u*(7+w2*15);
-  const y=v*v*v*1+3*v*v*u*(-17)+3*v*u*u*(-58)+u*u*u*(-60+w2*4);
-  pts.push([x,y]);
+ // Cylindrical, softly tapered ginger tail with coherent fur texture.
+ g.save();g.beginPath();g.rect(-100,-125,200,122);g.clip();
+ const ta=t-2.7,w1=Math.sin(ta*2.25),w2=Math.sin(ta*2.25-.85),pts=[],norm=[],width=[];
+ const N=76;
+ for(let j=0;j<=N;j++){
+  const u=j/N,v=1-u;
+  pts.push([v*v*v*14+3*v*v*u*(24+w1*3)+3*v*u*u*(45+w1*10)+u*u*u*(7+w2*15),v*v*v*1+3*v*v*u*(-17)+3*v*u*u*(-58)+u*u*u*(-60+w2*4)]);
  }
- for(let j=0;j<=64;j++){
-  const u=j/64,p=pts[j],prev=pts[Math.max(0,j-1)],next=pts[Math.min(64,j+1)],dx=next[0]-prev[0],dy=next[1]-prev[1],l=Math.hypot(dx,dy)||1;
-  const width=(6.5-2.6*u)*Math.sqrt(Math.max(.001,1-Math.pow(u,24)));
-  left.push([p[0]-dy/l*width,p[1]+dx/l*width]);right.push([p[0]+dy/l*width,p[1]-dx/l*width]);
+ for(let j=0;j<=N;j++){
+  const u=j/N,a=pts[Math.max(0,j-1)],b=pts[Math.min(N,j+1)],dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1;
+  norm.push([-dy/l,dx/l]);width.push((6.7-2.5*u)*Math.sqrt(Math.max(0,1-Math.pow(u,22))));
  }
- function tailSection(i,j){g.beginPath();g.moveTo(...left[i]);for(let k=i+1;k<=j;k++)g.lineTo(...left[k]);for(let k=j;k>=i;k--)g.lineTo(...right[k]);g.closePath()}
- tailSection(0,64);
- const fur=g.createLinearGradient(6,-10,36,-43);
- fur.addColorStop(0,'#a45024');fur.addColorStop(.24,'#cf7839');fur.addColorStop(.51,'#e9a05b');fur.addColorStop(.78,'#c46a32');fur.addColorStop(1,'#803b20');
- g.fillStyle=fur;g.fill();g.save();g.clip();
- for(const [i,j] of [[8,12],[19,24],[31,36],[43,48],[55,64]]){
-  const alpha=g.globalAlpha;
-  g.globalAlpha=alpha*.50;tailSection(i,j);g.fillStyle='#85401f';g.fill();g.globalAlpha=alpha;
+ const xy=(j,f)=>[pts[j][0]+norm[j][0]*width[j]*f,pts[j][1]+norm[j][1]*width[j]*f];
+ const band=(f0,f1)=>{g.beginPath();g.moveTo(...xy(0,f0));for(let j=1;j<=N;j++)g.lineTo(...xy(j,f0));for(let j=N;j>=0;j--)g.lineTo(...xy(j,f1));g.closePath()};
+ band(-1,1);g.fillStyle='#9b572e';g.fill();g.save();g.clip();
+ // Longitudinal bands approximate light across the cylindrical cross section, not flat stripes.
+ for(let k=0;k<30;k++){
+  const f0=-1+2*k/30,f1=-1+2*(k+1)/30,f=(f0+f1)/2;
+  const lit=.34+.66*Math.sqrt(Math.max(0,1-Math.pow((f+.28)/1.28,2)));
+  band(f0-.013,f1+.013);g.fillStyle='rgb('+Math.round(75+130*lit)+','+Math.round(32+91*lit)+','+Math.round(16+48*lit)+')';g.fill();
  }
- // Fine, tapered fur strokes follow the local direction of the curved tail.
- for(let j=3;j<63;j++){
-  const u=j/64,p=pts[j],v=pts[j+1],dx=v[0]-p[0],dy=v[1]-p[1],l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l;
-  for(let k=0;k<3;k++){
-   const seed=j*17+k*91,offset=(r(seed)-.5)*(8-4*u),len=1.1+r(seed+2)*2.5;
-   const xx=p[0]+nx*offset,yy=p[1]+ny*offset;
-   g.beginPath();g.moveTo(xx,yy);g.quadraticCurveTo(xx+dx/l*len*.5+nx*.25,yy+dy/l*len*.5+ny*.25,xx+dx/l*len,yy+dy/l*len);
-   g.strokeStyle=k%2?'#80371642':'#ffe0a65c';g.lineWidth=.36;g.stroke();
+ // Irregular tabby rings shaded with the underlying fur.
+ for(let j=1;j<N;j++){
+  const u=j/N, ring=Math.pow(.5+.5*Math.cos(u*2*Math.PI*5.0+Math.sin(u*17)*.24),8);
+  if(ring<.045)continue;
+  g.beginPath();g.moveTo(...xy(j,-1));g.lineTo(...xy(j,1));g.strokeStyle='rgba(75,34,17,'+(.42*ring)+')';g.lineWidth=2.1;g.stroke();
+ }
+ // Stable seeded strands travel with the tail. Highlights follow the contour.
+ for(let j=2;j<N-2;j++){
+  const p=pts[j],n=norm[j],a=pts[j+1],dx=a[0]-p[0],dy=a[1]-p[1],l=Math.hypot(dx,dy)||1;
+  for(let k=0;k<8;k++){
+   const sd=j*47+k*131,side=(r(sd)-.5)*1.94,pp=xy(j,side),len=.8+r(sd+2)*2.2;
+   g.beginPath();g.moveTo(...pp);g.quadraticCurveTo(pp[0]+dx/l*len*.5+n[0]*side*.22,pp[1]+dy/l*len*.5+n[1]*side*.22,pp[0]+dx/l*len+n[0]*side*.45,pp[1]+dy/l*len+n[1]*side*.45);
+   g.strokeStyle=['#f6c68d61','#6c301a68','#b57a465e','#f1aa6650'][k%4];g.lineWidth=.15+r(sd+3)*.23;g.stroke();
   }
  }
- // Darken and conceal the base as it meets the eye, avoiding a visible cut or lower tip.
- const root=g.createLinearGradient(0,-17,0,-3);
- root.addColorStop(0,'#1b101000');root.addColorStop(.7,'#1b1010b0');root.addColorStop(1,'#1b1010');
- g.fillStyle=root;g.fillRect(-50,-17,120,14);
- g.restore();g.restore();
+ const root=g.createLinearGradient(0,-19,0,-3);root.addColorStop(0,'#1b101000');root.addColorStop(.8,'#1b1010a0');root.addColorStop(1,'#1b1010f0');g.fillStyle=root;g.fillRect(-50,-19,120,16);g.restore();
+ // A sparse soft fur edge, restricted above the eyes.
+ for(let j=5;j<N-3;j++){
+  for(const side of [-1,1]){
+   const sd=j*59+(side+1)*17,p=xy(j,side*.94),n=norm[j],a=pts[j+1],v=pts[j],dx=a[0]-v[0],dy=a[1]-v[1],l=Math.hypot(dx,dy)||1,len=.4+r(sd)*1.1;
+   g.beginPath();g.moveTo(...p);g.lineTo(p[0]+n[0]*side*len+dx/l*.65,p[1]+n[1]*side*len+dy/l*.65);g.strokeStyle=side<0?'#e6ad7560':'#7e431f65';g.lineWidth=.18;g.stroke();
+  }
+ }
+ g.restore();
  eye(-17,0,blink,.94);eye(17,0,blink,.94);g.restore();
 }
 // Typography enters after the reveal, with a measured light pass.

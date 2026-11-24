@@ -56,8 +56,8 @@ if(t>=FIRE){
     ember(x,y,size,1-u*.86,alpha,seed,age);
   }
 }
-// Cat eyes: preserve the original brief blink.
-let ca=smooth((t-1.55)/.36)*(1-smooth((t-3.15)/.5));if(ca>0){let blink=1-.97*Math.exp(-Math.pow((t-2.52)/.095,2));g.save();g.globalAlpha*=ca;glow(410,425,62,'#10090fc0');eye(392,424,blink,.94);eye(426,422,blink,.94);g.restore()}
+// Cat eyes: enlarged and aligned beside the FOLLOW heading, synchronized with its entrance.
+let ca=textIn*(1-smooth((t-4.05)/.5));if(ca>0){let blink=1-.97*Math.exp(-Math.pow((t-3.42)/.095,2));g.save();g.globalAlpha*=ca;g.font='650 19px system-ui,sans-serif';g.letterSpacing='0px';let cx=466+g.measureText('N U E V O   F O L L O W').width+77+(1-ease((t-2.7)/.6))*20;g.translate(cx,225);g.scale(1.75,1.75);glow(0,0,52,'#10090f88');eye(-17,0,blink,.94);eye(17,0,blink,.94);g.restore()}
 // Typography enters after the reveal, with a measured light pass.
 if(textIn>0){g.save();g.globalAlpha*=textIn*textOut;g.translate((1-ease((t-2.7)/.6))*20,0);let x=466;txt('N U E V O   F O L L O W',x,225,19,650,'#ffc8a0');let fs=56;do{g.font=`800 ${fs}px system-ui,sans-serif`;if(g.measureText(username).width<=560)break;fs-=2}while(fs>14);let gr=g.createLinearGradient(0,252,0,318);gr.addColorStop(0,'#fff8ed');gr.addColorStop(.58,'#f4f0f7');gr.addColorStop(1,'#aebbd8');g.shadowColor='#11101f';g.shadowBlur=13;txt(username,x,281,fs,800,gr);g.shadowBlur=0;let line= g.createLinearGradient(x,0,x+410,0);line.addColorStop(0,'#ff9c52');line.addColorStop(.35,'#ffd5a1');line.addColorStop(.66,'#79a9f8');line.addColorStop(1,'#79a9f800');g.fillStyle=line;g.fillRect(x,322,410*ease((t-2.73)/.9),1.5);txt('Gracias por unirte a SoyFeniix',x,350,19,450,'#bfc2d0');if(t<3.8){let xx=x+ease((t-2.8)/.85)*450;glow(xx,322,28,'#ffe2bba0',1-smooth((t-3.35)/.45))}g.restore()}}
 requestAnimationFrame(frame);

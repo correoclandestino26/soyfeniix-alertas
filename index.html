@@ -66,20 +66,34 @@ function metal(y,sz,gold=false){
 }
 // A single soft metallic reflection travels across every line in both directions.
 function letterReflection(t,left,right){
-  const begin=3.12,finish=6.11;
+  const begin=2.82,finish=6.15;
   if(t<=begin||t>=finish)return null;
   const p=(t-begin)/(finish-begin);
   const travel=1-Math.abs(2*p-1);
-  const center=mix(left-90,right+75,travel);
-  const gr=g.createLinearGradient(center-85,260,center+85,275);
-  const stops=[[0,'rgba(255,240,200,0)'],[.12,'rgba(75,49,25,.32)'],[.24,'rgba(100,69,39,.38)'],[.34,'rgba(255,197,102,.70)'],[.41,'rgba(255,238,186,.96)'],[.46,'#ffffff'],[.54,'#ffffff'],[.59,'rgba(255,249,220,.98)'],[.66,'rgba(255,207,118,.75)'],[.76,'rgba(88,57,30,.36)'],[.88,'rgba(90,65,40,.20)'],[1,'rgba(255,240,200,0)']];
+  const center=mix(left-34,right+28,travel);
+  const half=112;
+  const gr=g.createLinearGradient(center-half,0,center+half,0);
+  const stops=[[0,'rgba(255,230,178,0)'],[.13,'rgba(55,40,29,.40)'],[.25,'rgba(91,62,36,.55)'],[.32,'rgba(255,178,77,.94)'],[.39,'#ffe6ac'],[.43,'#ffffff'],[.57,'#ffffff'],[.62,'#fff4d7'],[.69,'rgba(255,194,99,.94)'],[.77,'rgba(91,62,36,.48)'],[.88,'rgba(55,40,29,.30)'],[1,'rgba(255,230,178,0)']];
+  const a=smooth((t-begin)/.16)*(1-smooth((t-(finish-.18))/.18));
   for(const [stop,color] of stops)gr.addColorStop(stop,color);
-  return gr;
+  const edge=g.createLinearGradient(center-52,0,center+52,0);
+  edge.addColorStop(0,'rgba(255,240,206,0)');
+  edge.addColorStop(.28,'rgba(255,218,149,.45)');
+  edge.addColorStop(.5,'rgba(255,255,255,.98)');
+  edge.addColorStop(.72,'rgba(255,218,149,.45)');
+  edge.addColorStop(1,'rgba(255,240,206,0)');
+  return {fill:gr,edge,alpha:a};
 }
 function txt(text,x,y,sz,weight,color,spacing=0,shine=null){
  g.save();g.font=alertFont(sz,weight);g.textAlign='left';g.textBaseline='middle';g.letterSpacing=spacing+'px';g.lineJoin='round';
  g.strokeStyle='#190d15';g.lineWidth=Math.max(1.1,sz*.055);g.shadowColor='#07050c';g.shadowBlur=5;g.shadowOffsetY=3;g.strokeText(text,x,y);
- g.shadowBlur=0;g.shadowOffsetY=0;g.fillStyle=color;g.fillText(text,x,y);if(shine){g.fillStyle=shine;g.fillText(text,x,y);}
+ g.shadowBlur=0;g.shadowOffsetY=0;g.fillStyle=color;g.fillText(text,x,y);if(shine){
+  g.save();g.globalAlpha*=shine.alpha;
+  g.fillStyle=shine.fill;g.fillText(text,x,y);
+  // The highlight is drawn only as glyph fill and a fine glyph contour; never as a rectangle or a background layer.
+  g.strokeStyle=shine.edge;g.lineWidth=Math.max(.55,sz*.016);g.strokeText(text,x,y);
+  g.restore();
+ }
  const width=g.measureText(text).width;g.restore();return width;
 }
 function textCrown(x,y){

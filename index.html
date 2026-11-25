@@ -65,13 +65,15 @@ function metal(y,sz,gold=false){
  for(const [p,col] of stops)gr.addColorStop(p,col);return gr;
 }
 // A single soft metallic reflection travels across every line in both directions.
-function letterReflection(t){
-  const begin=3.05,finish=6.10;
+function letterReflection(t,left,right){
+  const begin=3.12,finish=6.11;
   if(t<=begin||t>=finish)return null;
   const p=(t-begin)/(finish-begin);
-  const center=mix(365,1125,.5-.5*Math.cos(p*2*Math.PI));
-  const gr=g.createLinearGradient(center-66,260,center+66,282);
-  for(const [stop,color] of [[0,'rgba(255,245,222,0)'],[.27,'rgba(255,245,222,.08)'],[.43,'rgba(255,249,236,.38)'],[.5,'rgba(255,255,255,.78)'],[.57,'rgba(255,249,236,.38)'],[.73,'rgba(255,245,222,.08)'],[1,'rgba(255,245,222,0)']])gr.addColorStop(stop,color);
+  const travel=1-Math.abs(2*p-1);
+  const center=mix(left-90,right+75,travel);
+  const gr=g.createLinearGradient(center-85,260,center+85,275);
+  const stops=[[0,'rgba(255,240,200,0)'],[.12,'rgba(75,49,25,.32)'],[.24,'rgba(100,69,39,.38)'],[.34,'rgba(255,197,102,.70)'],[.41,'rgba(255,238,186,.96)'],[.46,'#ffffff'],[.54,'#ffffff'],[.59,'rgba(255,249,220,.98)'],[.66,'rgba(255,207,118,.75)'],[.76,'rgba(88,57,30,.36)'],[.88,'rgba(90,65,40,.20)'],[1,'rgba(255,240,200,0)']];
+  for(const [stop,color] of stops)gr.addColorStop(stop,color);
   return gr;
 }
 function txt(text,x,y,sz,weight,color,spacing=0,shine=null){
@@ -130,7 +132,7 @@ function drawAlertText(t,textIn,textOut){
 // Phoenix emerges behind the text only, following its existing timing.
 if(textIn*textOut>0)phoenix(690,258,t,textIn*textOut);
 // Typography enters after the reveal, with a measured light pass.
-if(textIn>0){g.save();g.globalAlpha*=textIn*textOut;g.translate((1-ease((t-2.7)/.6))*20,0);let x=466;const shine=letterReflection(t);const headSize=33;g.font=alertFont(headSize,650);const titleW=g.measureText('NUEVO').width+10+g.measureText('FOLLOW').width;textCrown(x+titleW*.51,177);const headW=txt('NUEVO',x,225,headSize,650,metal(225,headSize),0,shine);txt('FOLLOW',x+headW+10,225,headSize,650,metal(225,headSize,true),0,shine);let fs=56;do{g.font=alertFont(fs,800);if(g.measureText(username).width<=560)break;fs-=2}while(fs>14);let gr=metal(281,fs);g.shadowColor='#11101f';g.shadowBlur=13;txt(username,x,281,fs,800,gr,0,shine);g.shadowBlur=0;let line= g.createLinearGradient(x,0,x+410,0);line.addColorStop(0,'#ff9c52');line.addColorStop(.35,'#ffd5a1');line.addColorStop(.66,'#79a9f8');line.addColorStop(1,'#79a9f800');g.fillStyle=line;g.fillRect(x,322,410*ease((t-2.73)/.9),1.5);const footSize=19;const footW=txt('Gracias por unirte a',x,350,footSize,450,metal(350,footSize),0,shine);const brandX=x+footW+9;const brandW=txt('Soy',brandX,350,23,650,metal(350,23),0,shine);txt('Feniix',brandX+brandW,350,23,650,metal(350,23,true),0,shine);if(t<3.8){let xx=x+ease((t-2.8)/.85)*450;glow(xx,322,28,'#ffe2bba0',1-smooth((t-3.35)/.45))}g.restore()}
+if(textIn>0){g.save();g.globalAlpha*=textIn*textOut;g.translate((1-ease((t-2.7)/.6))*20,0);let x=466;const headSize=33;g.font=alertFont(headSize,650);const titleW=g.measureText('NUEVO').width+10+g.measureText('FOLLOW').width;let fs=56;do{g.font=alertFont(fs,800);if(g.measureText(username).width<=560)break;fs-=2}while(fs>14);g.font=alertFont(fs,800);const nameW=g.measureText(username).width;g.font=alertFont(19,450);const footerPrefixW=g.measureText('Gracias por unirte a').width;g.font=alertFont(23,650);const footerW=footerPrefixW+9+g.measureText('Soy').width+g.measureText('Feniix').width;const shine=letterReflection(t,x,x+Math.max(titleW,nameW,footerW));textCrown(x+titleW*.51,177);const headW=txt('NUEVO',x,225,headSize,650,metal(225,headSize),0,shine);txt('FOLLOW',x+headW+10,225,headSize,650,metal(225,headSize,true),0,shine);let gr=metal(281,fs);g.shadowColor='#11101f';g.shadowBlur=13;txt(username,x,281,fs,800,gr,0,shine);g.shadowBlur=0;let line= g.createLinearGradient(x,0,x+410,0);line.addColorStop(0,'#ff9c52');line.addColorStop(.35,'#ffd5a1');line.addColorStop(.66,'#79a9f8');line.addColorStop(1,'#79a9f800');g.fillStyle=line;g.fillRect(x,322,410*ease((t-2.73)/.9),1.5);const footSize=19;const footW=txt('Gracias por unirte a',x,350,footSize,450,metal(350,footSize),0,shine);const brandX=x+footW+9;const brandW=txt('Soy',brandX,350,23,650,metal(350,23),0,shine);txt('Feniix',brandX+brandW,350,23,650,metal(350,23,true),0,shine);if(t<3.8){let xx=x+ease((t-2.8)/.85)*450;glow(xx,322,28,'#ffe2bba0',1-smooth((t-3.35)/.45))}g.restore()}
 }
 function prepareTextBurn(){
  const previous=g;g=burnSourceG;

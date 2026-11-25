@@ -122,7 +122,18 @@ let textIn=smooth((t-2.7)/.48),textOut=1-smooth((t-FIRE)/1.45);if(textIn){g.save
 // Incoming discharges with branching, bound to the character.
 let tick=Math.floor(t*10),charge=cl(t/.22)*(1-smooth((t-1.9)/.55));for(let i=0;i<6;i++){let k=(i*17+tick*3)%outline.length,dest=point(k,0,breath),from=[i%2?75:520,90+i*75],p=arc(from,dest,300+i*21+tick*113,95);let part=ease((t-i*.045)/.56);const hue=i===1?'#6bafff':i===4?'#f4f8ff':'#ff8734';electric(p.slice(0,Math.max(2,Math.ceil(p.length*part))),charge*(.32+.50*r(tick*17+i)),hue);if(part>.75){let j=12+i*2,pt=p[j];electric(arc(pt,[pt[0]+(i%2?-35:44),pt[1]-47],tick*11+i,33),charge*.52,hue)}}
 // The outline draws itself, then the actual original avatar materializes.
-let trace=outline.map((_,i)=>point(i,0,breath)),n=Math.floor(trace.length*ease(t/1.28));if(n>1)electric(trace.slice(0,n),(.95-.55*build)*(1-smooth((t-(FIRE-.25))/.25)));g.save();g.translate(ax,ay+breath);g.scale(sc,sc);g.globalAlpha*=build*fade;if(build<.96){g.save();g.globalAlpha*=.45;g.drawImage(silhouette,0,0);g.restore()}g.save();g.beginPath();g.rect(0,0,iw,ih*ease((t-.32)/1.22));g.clip();g.drawImage(img,0,0,iw,ih);g.restore();g.restore();if(t>.7&&t<FIRE){let strength=(.34+.30*(1-build))*(1-smooth((t-(FIRE-.3))/.3));for(let i=0;i<3;i++){let k=(Math.floor(t*13)+i*29)%outline.length;let p=point(k,0,breath),q=point(k+4,0,breath);electric(arc(p,q,tick*17+i*53,12),strength,i===0?'#6bafff':'#ff8734')}}
+let trace=outline.map((_,i)=>point(i,0,breath)),n=Math.floor(trace.length*ease(t/1.28));if(n>1)electric(trace.slice(0,n),(.95-.55*build)*(1-smooth((t-(FIRE-.25))/.25)));g.save();g.translate(ax,ay+breath);g.scale(sc,sc);g.globalAlpha*=build*fade;if(build<.96){g.save();g.globalAlpha*=.45;g.drawImage(silhouette,0,0);g.restore()}g.save();g.beginPath();g.rect(0,0,iw,ih*ease((t-.32)/1.22));g.clip();g.drawImage(img,0,0,iw,ih);g.restore();g.restore();if(t>.7&&t<FIRE){
+ const strength=(.56+.22*(1-build))*(1-smooth((t-(FIRE-.3))/.3));
+ const route=trace.concat([trace[0]]),dist=[0];
+ for(let j=1;j<route.length;j++)dist.push(dist[j-1]+Math.hypot(route[j][0]-route[j-1][0],route[j][1]-route[j-1][1]));
+ const total=dist[dist.length-1],gap=total/4,span=Math.min(49,gap*.18);
+ const at=d=>{d=(d%total+total)%total;let j=1;while(j<dist.length-1&&dist[j]<d)j++;const u=(d-dist[j-1])/(dist[j]-dist[j-1]||1);return [mix(route[j-1][0],route[j][0],u),mix(route[j-1][1],route[j][1],u)]};
+ for(let i=0;i<4;i++){
+ const head=(t-.7)*155+i*gap,p=[];
+ for(let j=0;j<=16;j++){const d=head-span+span*j/16,a=at(d),b=at(d+1),dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1,offset=(r(tick*113+i*71+j*17)-.5)*7*Math.sin(Math.PI*j/16);p.push([a[0]-dy/l*offset,a[1]+dx/l*offset]);}
+ electric(p,strength,i%2===0?'#ff8734':'#6bafff');
+ }
+}
 // Fire starts exactly as the electrical outline extinguishes.
 if(t>=FIRE){
   const ft=t-FIRE;

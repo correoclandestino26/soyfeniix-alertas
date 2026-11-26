@@ -390,11 +390,25 @@ function raidFrame(now){
  const bg=g.createLinearGradient(65,0,460,0);bg.addColorStop(0,'transparent');bg.addColorStop(.26,'rgba(15,12,18,.91)');bg.addColorStop(.86,'rgba(15,12,18,.88)');bg.addColorStop(1,'transparent');g.fillStyle=bg;g.fillRect(65,49,395,132);
  if(raidHero.complete&&raidHero.naturalWidth){g.save();g.globalAlpha*=intro;const h=210,w=h*raidHero.naturalWidth/raidHero.naturalHeight;g.drawImage(raidHero,6,0,w,h);g.restore()}
  g.save();g.globalAlpha*=reveal;g.textAlign='left';g.textBaseline='middle';const x=167;
- g.font='600 12px Verdana, sans-serif';g.fillStyle='#e9ab70';g.fillText('RAID  /  BIENVENIDA',x,69);
- let fs=28;do{g.font='700 '+fs+'px Verdana, sans-serif';if(g.measureText(username).width<=260)break;fs--}while(fs>11);g.fillStyle='#fff5e9';g.fillText(username,x,98);
- g.fillStyle='#d98245';g.fillRect(x,119,245*reveal,1);
- g.font='600 16px Verdana, sans-serif';g.fillStyle='#f4c698';g.fillText(bitAmount===null?'Tu comunidad está aquí':bitAmount+(bitAmount===1?' espectador':' espectadores'),x,139);
- g.font='13px Verdana, sans-serif';g.fillStyle='#eee4dd';g.fillText('Gracias por compartir tu comunidad',x,162);
+ // Staggered cinematic lettering, molten metallic gradients and moving highlights.
+ function raidTitle(str,y,size,weight,delay,limit){
+   const p=raidEase((t-delay)/.65);if(p<=0)return;
+   g.save();g.globalAlpha*=p;g.translate(x+(1-p)*24,y+(1-p)*9);
+   let fs=size;do{g.font=weight+' '+fs+'px Georgia, serif';if(g.measureText(str).width<=limit)break;fs--}while(fs>11);
+   const w=g.measureText(str).width,shine=(t*0.65)%1.7-.35;
+   const grad=g.createLinearGradient(0,-fs*.55,0,fs*.55);
+   grad.addColorStop(0,'#fff9ce');grad.addColorStop(.27,'#ffd36a');grad.addColorStop(.55,'#f99b35');grad.addColorStop(.8,'#ffdd83');grad.addColorStop(1,'#ba4d16');
+   g.shadowColor='rgba(255,91,12,.85)';g.shadowBlur=9+5*Math.sin(t*4);g.lineWidth=2;g.strokeStyle='#54200e';g.strokeText(str,0,0);g.fillStyle=grad;g.fillText(str,0,0);g.shadowBlur=0;
+   if(w>0){const sweep=g.createLinearGradient((shine-.24)*w,0,(shine+.24)*w,0);sweep.addColorStop(0,'rgba(255,255,255,0)');sweep.addColorStop(.5,'rgba(255,255,230,.85)');sweep.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=sweep;g.fillText(str,0,0);}
+   g.restore();
+ }
+ // Deterministic embers: no random flicker between frames.
+ g.save();for(let i=0;i<24;i++){const phase=(t*(.23+(i%5)*.035)+i*.137)%1;const px=x+((i*73)%270)+Math.sin(t*1.7+i)*12;const py=174-phase*125;g.globalAlpha=reveal*out*Math.sin(phase*Math.PI)*.62;g.fillStyle=i%3===0?'#fff2a4':'#ff7c25';g.shadowColor='#ff681a';g.shadowBlur=5;g.beginPath();g.arc(px,py,1+(i%3)*.45,0,Math.PI*2);g.fill();}g.restore();
+ raidTitle('NUEVA RAID',65,22,'bold',.25,260);
+ raidTitle(username,100,34,'bold',.65,270);
+ const line=raidEase((t-.95)/.7);g.save();g.globalAlpha*=line;const beam=g.createLinearGradient(x,0,x+260,0);beam.addColorStop(0,'#ff7c23');beam.addColorStop(.5,'#fff3b1');beam.addColorStop(1,'rgba(255,121,30,0)');g.fillStyle=beam;g.shadowColor='#ff741c';g.shadowBlur=8;g.fillRect(x,121,260*line,2);g.restore();
+ raidTitle(bitAmount===null?'Tu comunidad está aquí':bitAmount+(bitAmount===1?' espectador':' espectadores'),142,19,'bold',1.05,270);
+ g.save();g.globalAlpha*=raidEase((t-1.45)/.65);g.font='italic 13px Georgia, serif';g.fillStyle='#ffe0b3';g.fillText('Gracias por compartir tu comunidad',x,166);g.restore();
  g.restore();g.restore();
 }
 function startRaid(){backgroundMusic.pause();phoenixAudio.pause();followAudio.pause();clearTimeout(phoenixTimer);raidTrack.pause();raidTrack.currentTime=0;raidTrack.volume=.10;if(!muted)raidTrack.play().catch(e=>console.warn('[Raid audio]',e));requestAnimationFrame(raidFrame);}

@@ -38,6 +38,14 @@ const css=`
 .subOrbit{opacity:0}#subStage.active .subOrbit{opacity:1}#subStage.ending .subOrbit{opacity:0;transition:opacity .4s}
 .subPlateGlow{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:9 91;animation:subPlateRun 2.3s linear infinite}
 @keyframes subPlateRun{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+
+#subStage.active #subMotion{animation:subPowerOn .85s linear both}
+#subStage.active #subArtDom{animation:none;opacity:1}
+#subStage.ending #subMotion{animation:subPowerOff 1.05s linear both}
+#subStage.ending #subArtDom{animation:none;opacity:1}
+#subStage.ending #subNameDom{animation:none;opacity:1;transform:translate(-50%,-50%)}
+@keyframes subPowerOn{0%,10%{opacity:0}24%,33%{opacity:.85}40%,48%{opacity:.09}59%,68%{opacity:1}75%,82%{opacity:.14}94%,100%{opacity:1}}
+@keyframes subPowerOff{0%,6%{opacity:1}18%,25%{opacity:.14}32%,41%{opacity:1}52%,60%{opacity:.09}67%,76%{opacity:.85}90%,100%{opacity:0}}
 `;
 const routes=[
  {p:[[125,191],[155,163],[209,133],[248,126],[279,144]],c:'#ff9b42',d:0},

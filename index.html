@@ -390,13 +390,10 @@ function raidFrame(now){
  const bg=g.createLinearGradient(65,0,460,0);bg.addColorStop(0,'transparent');bg.addColorStop(.26,'rgba(15,12,18,.91)');bg.addColorStop(.86,'rgba(15,12,18,.88)');bg.addColorStop(1,'transparent');g.fillStyle=bg;g.fillRect(65,49,395,132);
  if(raidHero.complete&&raidHero.naturalWidth){g.save();g.globalAlpha*=intro;const h=238,w=h*raidHero.naturalWidth/raidHero.naturalHeight,ax=19,ay=-14;
  const pulse=.86+.14*Math.sin(t*3.4);
- g.save();g.translate(ax+w*.49,ay+h*.48);g.scale(.77,1.14);
- const aura=g.createRadialGradient(0,0,12,0,0,112);
- aura.addColorStop(0,'rgba(255,202,100,.5)');aura.addColorStop(.44,'rgba(255,105,21,.37)');aura.addColorStop(.72,'rgba(216,48,8,.20)');aura.addColorStop(1,'rgba(140,27,0,0)');
- g.globalAlpha*=pulse;g.fillStyle=aura;g.fillRect(-112,-112,224,224);
- for(let j=0;j<7;j++){const ang=t*.55+j*6.283/7,rad=59+11*Math.sin(t*1.5+j);const xx=Math.cos(ang)*rad,yy=Math.sin(ang)*rad;const glow=g.createRadialGradient(xx,yy,1,xx,yy,35);glow.addColorStop(0,'rgba(255,137,34,.19)');glow.addColorStop(1,'rgba(255,58,0,0)');g.fillStyle=glow;g.fillRect(xx-35,yy-35,70,70);}
- g.restore();
- g.shadowColor='rgba(255,108,24,.8)';g.shadowBlur=13*pulse;g.drawImage(raidHero,ax,ay,w,h);g.shadowBlur=0;g.restore()}
+ // Narrow silhouette-following backlight; no broad orange cloud or front overlay.
+ g.save();g.globalAlpha*=.64*pulse;g.shadowColor='rgba(255,145,49,.72)';g.shadowBlur=6;g.shadowOffsetX=0;g.shadowOffsetY=0;g.drawImage(raidHero,ax,ay,w,h);g.restore();
+ g.save();g.globalAlpha*=.80;g.shadowColor='rgba(255,211,137,.65)';g.shadowBlur=2.5;g.drawImage(raidHero,ax,ay,w,h);g.restore();
+ g.shadowBlur=0;g.drawImage(raidHero,ax,ay,w,h);g.restore()}
  g.save();g.globalAlpha*=reveal;g.textAlign='left';g.textBaseline='middle';const x=167;
  // Staggered cinematic lettering, molten metallic gradients and moving highlights.
  function raidTitle(str,y,size,weight,delay,limit,silver=false){

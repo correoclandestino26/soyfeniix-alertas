@@ -26,6 +26,18 @@ const css=`
 @keyframes subNameIn{from{opacity:0;transform:translate(-50%,-35%)}to{opacity:1;transform:translate(-50%,-50%)}}
 #subStage.ending #subNameDom{animation:subNameOut .6s ease-in both}
 @keyframes subNameOut{from{opacity:1}to{opacity:0}}
+
+#subStage.active #subArtDom{animation:subArtIn .85s ease-out both}
+#subStage.ending #subArtDom{animation:subArtOut 1.05s ease-in both}
+#subStage.active #subNameDom{animation:subNameIn .42s ease-out .85s both}
+#subStage.ending #subNameDom{animation:subNameOut .42s ease-in both}
+#subStage.charged .subBolt,#subStage.ending .subBolt{animation:subZap var(--speed) linear var(--delay) infinite}
+.subBolt .subTravel{stroke-dasharray:35 65;animation:subTravel var(--speed) linear infinite}
+@keyframes subTravel{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+@keyframes subZap{0%,100%{opacity:0}10%{opacity:.6}22%{opacity:1}57%{opacity:.8}75%{opacity:.15}88%{opacity:.85}95%{opacity:.12}}
+.subOrbit{opacity:0}#subStage.active .subOrbit{opacity:1}#subStage.ending .subOrbit{opacity:0;transition:opacity .4s}
+.subPlateGlow{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:9 91;animation:subPlateRun 2.3s linear infinite}
+@keyframes subPlateRun{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
 `;
 const routes=[
  {p:[[125,191],[155,163],[209,133],[248,126],[279,144]],c:'#ff9b42',d:0},
@@ -44,10 +56,14 @@ const routes=[
 const sparkPoints=[[154,166,8],[254,91,9],[302,22,7],[367,131,9],[571,149,10],[691,60,8],[894,84,9],[956,195,11],[883,365,9],[641,345,11],[791,425,10],[420,426,8],[622,472,9],[91,446,7],[26,278,8],[184,223,9],[696,114,8]];
 const rand=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x)};
 function lightning(points,seed){let out='M'+points[0].join(' ');for(let i=1;i<points.length;i++){const a=points[i-1],b=points[i],dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy),n=Math.max(3,Math.round(l/8));for(let j=1;j<=n;j++){const p=j/n,wiggle=j===n?0:(rand(seed+i*39+j)*2-1)*4.2;out+='L'+(a[0]+dx*p-dy/l*wiggle).toFixed(1)+' '+(a[1]+dy*p+dx/l*wiggle).toFixed(1)}}return out}
-function arc(o,i){const d=lightning(o.p,i+19),m=o.p[Math.floor(o.p.length/2)],n=o.p[Math.floor(o.p.length/2)+1]||m,side=i%2?1:-1,branch=lightning([m,[m[0]+(n[0]-m[0])*.32+side*9,m[1]+(n[1]-m[1])*.32-15],[m[0]+(n[0]-m[0])*.55+side*17,m[1]+(n[1]-m[1])*.55-21]],i+63);return '<g class="subBolt" style="--speed:'+(1.02+i%4*.19)+'s;--delay:'+o.d+'s"><path d="'+d+'" stroke="'+o.c+'" stroke-width="7" opacity=".15"/><path d="'+d+'" stroke="'+o.c+'" stroke-width="3" opacity=".85"/><path d="'+d+'" stroke="#fff4d9" stroke-width="1.1"/><path d="'+branch+'" stroke="'+o.c+'" stroke-width="2" opacity=".8"/><path d="'+branch+'" stroke="#f9fcff" stroke-width=".7"/></g>'}
+function arc(o,i){const d=lightning(o.p,i+19),m=o.p[Math.floor(o.p.length/2)],n=o.p[Math.floor(o.p.length/2)+1]||m,side=i%2?1:-1,branch=lightning([m,[m[0]+(n[0]-m[0])*.32+side*9,m[1]+(n[1]-m[1])*.32-15],[m[0]+(n[0]-m[0])*.55+side*17,m[1]+(n[1]-m[1])*.55-21]],i+63);return '<g class="subBolt" style="--speed:'+(1.02+i%4*.19)+'s;--delay:'+o.d+'s"><path class="subTravel" pathLength="100" d="'+d+'" stroke="'+o.c+'" stroke-width="7" opacity=".15"/><path class="subTravel" pathLength="100" d="'+d+'" stroke="'+o.c+'" stroke-width="3" opacity=".85"/><path class="subTravel" pathLength="100" d="'+d+'" stroke="#fff4d9" stroke-width="1.1"/><path d="'+branch+'" stroke="'+o.c+'" stroke-width="2" opacity=".8"/><path d="'+branch+'" stroke="#f9fcff" stroke-width=".7"/></g>'}
 function spark(p,i){return '<g class="subSpark" transform="translate('+p[0]+' '+p[1]+')" style="--speed:'+(2.1+i%5*.23)+'s;--delay:'+(i*.17)+'s"><circle r="'+p[2]+'" fill="url(#subSparkHalo)"/><path d="M-'+p[2]+' 0H'+p[2]+'M0 -'+(p[2]*.55)+'V'+(p[2]*.55)+'" stroke="#fff1c7" stroke-width="1.3" stroke-linecap="round"/><circle r="1.6" fill="#fff"/></g>'}
+
+const platePath='M438 346 L899 338 L844 425 L381 425 Z';
+const plate='<g class="subOrbit"><path class="subPlateGlow" pathLength="100" d="'+platePath+'" stroke="#ff8b28" stroke-width="10" opacity=".23"/><path class="subPlateGlow" pathLength="100" d="'+platePath+'" stroke="#ffad45" stroke-width="4"/><path class="subPlateGlow" pathLength="100" d="'+platePath+'" stroke="#fff8e1" stroke-width="1.5"/></g>';
+function movingGlint(o,i){const d='M'+o.p.map(p=>p.join(' ')).join('L');const col=i%2?'#8dd8ff':'#ffb05b';return '<g class="subOrbit"><g opacity="0"><circle r="10" fill="url(#subSparkHalo)" opacity=".65"/><path d="M-10 0H10M0 -4V4" stroke="'+col+'" stroke-width="2" stroke-linecap="round"/><circle r="1.8" fill="#fff"/><animateMotion path="'+d+'" dur="'+(1.4+i%4*.35)+'s" begin="'+(i*.12)+'s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.12;.82;1" dur="'+(1.4+i%4*.35)+'s" begin="'+(i*.12)+'s" repeatCount="indefinite"/></g></g>'}
 const style=document.createElement('style');style.textContent=css;document.head.appendChild(style);
-const stage=document.getElementById('subStage');stage.innerHTML='<div id="subMotion"><img id="subArtDom" src="Imagen%20de%20ChatGPT%2025%20nov%202026%2C%2016_47_30-2.png" alt=""><svg id="subFx" viewBox="0 0 1000 563" aria-hidden="true"><defs><radialGradient id="subSparkHalo"><stop stop-color="#fff7dd"/><stop offset=".2" stop-color="#ffc870"/><stop offset="1" stop-color="#ff9c40" stop-opacity="0"/></radialGradient></defs>'+routes.map(arc).join('')+sparkPoints.map(spark).join('')+'</svg><div id="subNameDom"></div></div>';
+const stage=document.getElementById('subStage');stage.innerHTML='<div id="subMotion"><img id="subArtDom" src="Imagen%20de%20ChatGPT%2025%20nov%202026%2C%2016_47_30-2.png" alt=""><svg id="subFx" viewBox="0 0 1000 563" aria-hidden="true"><defs><radialGradient id="subSparkHalo"><stop stop-color="#fff7dd"/><stop offset=".2" stop-color="#ffc870"/><stop offset="1" stop-color="#ff9c40" stop-opacity="0"/></radialGradient></defs>'+routes.map(arc).join('')+sparkPoints.map(spark).join('')+plate+routes.filter((_,i)=>i!==7).map(movingGlint).join('')+'</svg><div id="subNameDom"></div></div>';
 window.subFitName=function(name){const el=document.getElementById('subNameDom');el.textContent=name;const w=document.getElementById('subMotion').clientWidth;let fs=Math.min(34,w*.038);el.style.fontSize=fs+'px';while(el.scrollWidth>el.clientWidth&&fs>11){fs-=1;el.style.fontSize=fs+'px'}};
 })();
 </script><div id="label">SOYFENIIX / IGNITION / PRUEBAS DE ALERTAS</div><div id="controls"><input id="who" maxlength="40" aria-label="Nombre de seguidor" value="NuevoSeguidor"><button id="playBits">▶ Bits</button><button id="play">▶ Follow</button><button id="playSub">▶ Sub</button><button id="playRaid">▶ Raid</button><button id="mute" aria-label="Activar o silenciar audio">Sonido: sí</button></div><script>
@@ -178,10 +194,10 @@ function startSub(){
  backgroundMusic.pause();phoenixAudio.pause();followAudio.pause();followAudio.currentTime=0;followAudio.volume=electricVolume;fireAudioPhase=3;
  cyberSubActive=true;
  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);c.style.visibility='hidden';
- subStage.classList.remove('active','charged','ending');void subStage.offsetWidth;subStage.classList.add('active','charged');window.subFitName(username);subEndingTimer=setTimeout(()=>{subStage.classList.add('ending');if(!muted){followAudio.pause();followAudio.currentTime=0;followAudio.volume=electricVolume;followAudio.play().catch(()=>{});}},8900);
+ subStage.classList.remove('active','charged','ending');void subStage.offsetWidth;subStage.classList.add('active','charged');window.subFitName(username);document.getElementById('subFx').setCurrentTime(0);subEndingTimer=setTimeout(()=>{subStage.classList.add('ending');if(!muted){followAudio.pause();followAudio.currentTime=0;followAudio.volume=electricVolume;followAudio.play().catch(()=>{});}},5200);
  if(!muted)followAudio.play().catch(()=>{});
  subElectricTimer=setTimeout(()=>{followAudio.pause();subStage.classList.remove('charged');},3500);
- subFinishTimer=setTimeout(finishSub,10400);
+ subFinishTimer=setTimeout(finishSub,6300);
 }
 let framePending=false;function requestLegacyFrame(){if(!framePending){framePending=true;requestAnimationFrame(frame)}}function frame(now){framePending=false;if(cyberSubActive||start<0)return;if(!ready){requestLegacyFrame();return;}requestLegacyFrame();g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);let t=(now-start)/1000;syncFireAudio(t);if(t>D){followAudio.pause();start=-1;testButtons.forEach(btn=>btn.disabled=false);return}let s=Math.min(c.width/W,c.height/H);g.translate((c.width-W*s)/2,(c.height-H*s)/2);g.scale(s,s);let end=cl((D-t)/.65),build=smooth((t-.26)/1.35),fade=1-smooth((t-FIRE)/1.5),breath=Math.sin(t*2.1)*1.5;g.globalAlpha=end;glow(ax+60,ay+190,220,'#347fff2b',build*fade*(1-smooth((t-(FIRE-.3))/.3)));glow(ax+60,ay+355,150,'#ff5c202a',smooth((t-FIRE)/.3)*fade); // Dark local contrast, no opaque panel
 let textIn=smooth((t-2.7)/.48),textOut=1-smooth((t-FIRE)/1.45);if(textIn){g.save();g.globalAlpha*=textIn*textOut;g.translate(0,0);g.scale(1,.46);glow(615,600,350,'#090b14a0');g.restore()}

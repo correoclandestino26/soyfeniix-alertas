@@ -370,98 +370,33 @@ function sound(){fireAudioPhase=0;backgroundMusic.pause();backgroundMusic.curren
 
 
 
-/* RAID — HORIZON. New artwork, motion, palette and typography. */
-const raidTrack=new Audio('https://correoclandestino26.github.io/soyfeniix-alertas/metallica-unforgiven.mp3');
-raidTrack.preload='auto';raidTrack.volume=.12;
-const rhClamp=x=>Math.max(0,Math.min(1,x)),rhEase=x=>{x=rhClamp(x);return x*x*(3-2*x)};
-const rhRand=n=>{const v=Math.sin(n*78.233+41.719)*43758.5453;return v-Math.floor(v)};
-const rhW=1100,rhH=560;
-const rhLandscape=document.createElement('canvas');rhLandscape.width=rhW;rhLandscape.height=rhH;
-(function(){
- const p=rhLandscape.getContext('2d');
- // A storm-lit mountain range, built from irregular ridges, rock strata and atmospheric depth.
- for(let layer=0;layer<5;layer++){
-  const base=277+layer*36, peaks=[];
-  for(let x=-10;x<=1110;x+=4){
-   const z=x/1100;
-   const envelope=Math.pow(Math.abs(z-.5)*2,.68);
-   const y=base-envelope*(77+layer*17)-Math.abs(Math.sin(x*.009+layer*3.5))*35-Math.abs(Math.sin(x*.023+layer*1.7))*20-(rhRand(x+layer*900)-.5)*12;
-   peaks.push([x,y]);
-  }
-  p.beginPath();p.moveTo(-10,560);for(const pt of peaks)p.lineTo(...pt);p.lineTo(1110,560);p.closePath();
-  let gr=p.createLinearGradient(0,base-160,0,560);
-  gr.addColorStop(0,['#718aab','#4c6687','#334764','#1d2c46','#101b30'][layer]);
-  gr.addColorStop(.65,['#263a58','#26354f','#192b42','#152236','#0b1425'][layer]);gr.addColorStop(1,'#080e19');p.fillStyle=gr;p.fill();
-  p.save();p.clip();
-  for(let i=0;i<280;i++){
-   const k=i+layer*500,x=rhRand(k*3+1)*1100,y=peaks[Math.min(peaks.length-1,Math.floor((x+10)/4))][1]+rhRand(k*3+2)*90,len=8+rhRand(k*3+3)*65;
-   p.strokeStyle=i%4===0?'rgba(177,198,222,.22)':'rgba(5,13,30,.20)';p.lineWidth=.5+rhRand(k+4)*1.3;p.beginPath();p.moveTo(x,y);p.lineTo(x-9-len*.27,y+len);p.stroke();
-  }p.restore();
- }
- // Soft-edged scene, suitable for an overlay rather than a rectangular video panel.
- p.globalCompositeOperation='destination-in';
- const mask=p.createRadialGradient(550,310,135,550,310,520);mask.addColorStop(0,'#fff');mask.addColorStop(.68,'#fff');mask.addColorStop(1,'transparent');p.fillStyle=mask;p.fillRect(0,0,1100,560);
- const v=p.createLinearGradient(0,0,0,560);v.addColorStop(0,'#fff');v.addColorStop(.7,'#fff');v.addColorStop(1,'transparent');p.fillStyle=v;p.fillRect(0,0,1100,560);
-})();
-function rhBird(p,x,y,z,phase,angle,alpha){
- p.save();p.translate(x,y);p.rotate(angle);p.scale(z,z);p.globalAlpha*=alpha;
- const lift=Math.sin(phase)*22,tip=Math.sin(phase+.65)*10;
- for(const side of [-1,1]){
-  p.save();p.scale(side,1);
-  p.beginPath();p.moveTo(1,-5);p.bezierCurveTo(15,-19-lift,33,-29-lift,58,-17-lift-tip);
-  p.bezierCurveTo(48,-11-lift,45,-7-lift,38,-5-lift);
-  for(let j=0;j<7;j++){let a=38-j*4.6,b=-5-lift+j*2.5;p.quadraticCurveTo(a+5,b+4,a-2,b+12+j*.7);p.lineTo(a-7,b+3);}
-  p.quadraticCurveTo(5,12,0,7);p.closePath();
-  let grad=p.createLinearGradient(0,-30-lift,0,25);grad.addColorStop(0,'#a9c7e2');grad.addColorStop(.20,'#354a63');grad.addColorStop(.6,'#0c1728');grad.addColorStop(1,'#040913');p.fillStyle=grad;p.fill();
-  p.strokeStyle='rgba(191,216,238,.5)';p.lineWidth=.65;p.beginPath();p.moveTo(2,-5);p.bezierCurveTo(17,-18-lift,33,-28-lift,58,-17-lift-tip);p.stroke();
-  p.restore();
- }
- p.fillStyle='#101a2a';p.beginPath();p.moveTo(-4,2);p.quadraticCurveTo(-6,-9,0,-11);p.quadraticCurveTo(6,-9,5,3);p.lineTo(9,19);p.lineTo(0,14);p.lineTo(-9,19);p.closePath();p.fill();p.restore();
-}
+
+/* RAID — ASCENSION: avatar-led, custom layered feather storm. */
+const raidTrack=new Audio('https://correoclandestino26.github.io/soyfeniix-alertas/metallica-unforgiven.mp3');raidTrack.preload='auto';raidTrack.volume=.12;
+const rdClamp=v=>Math.max(0,Math.min(1,v)),rdEase=v=>{v=rdClamp(v);return v*v*(3-2*v)},rdRand=n=>{let x=Math.sin(n*127.1+61.7)*43758.5453;return x-Math.floor(x)};
+const rdFeathers=document.createElement('canvas');rdFeathers.width=180;rdFeathers.height=260;
+(function(){const p=rdFeathers.getContext('2d');p.translate(90,230);const gr=p.createLinearGradient(-55,0,60,-200);gr.addColorStop(0,'#411914');gr.addColorStop(.35,'#ac3d21');gr.addColorStop(.7,'#ef8b36');gr.addColorStop(1,'#ffe6a0');p.fillStyle=gr;p.beginPath();p.moveTo(0,0);p.bezierCurveTo(-85,-72,-67,-164,49,-211);p.bezierCurveTo(62,-122,29,-39,0,0);p.fill();p.strokeStyle='#f9c37a';p.lineWidth=2;p.beginPath();p.moveTo(0,0);p.quadraticCurveTo(-5,-105,49,-211);p.stroke();for(let j=0;j<35;j++){const u=j/35,y=-u*200,x=49*u*u;for(const side of [-1,1]){p.strokeStyle=side<0?'rgba(255,194,112,.34)':'rgba(77,18,12,.55)';p.lineWidth=.8;p.beginPath();p.moveTo(x,y);p.quadraticCurveTo(x+side*25*(1-u),y-20,x+side*48*(1-u),y-28);p.stroke()}}})();
+const rdWing=document.createElement('canvas');rdWing.width=1100;rdWing.height=560;
+(function(){const p=rdWing.getContext('2d');for(const side of [-1,1]){p.save();p.translate(550,290);p.scale(side,1);for(let j=0;j<23;j++){const u=j/22;p.save();p.translate(24+u*235,-u*65);p.rotate(.25+u*1.02);const h=300-u*100,w=h*180/260;p.drawImage(rdFeathers,-w*.5,-h*.87,w,h);p.restore()}p.restore()}})();
 function raidFrame(now){
- if(start<0||alertType!=='raid')return;
- const t=(now-start)/1000,T=8.5;
+ if(start<0||alertType!=='raid')return;const t=(now-start)/1000,T=8.5;
  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);
- if(t>=T){raidTrack.pause();raidTrack.currentTime=0;start=-1;testButtons.forEach(btn=>btn.disabled=false);return}
- requestAnimationFrame(raidFrame);
- raidTrack.volume=muted?0:.12*(1-rhEase((t-7.15)/1.35));
- const sc=Math.min(c.width/1100,c.height/560);g.translate((c.width-1100*sc)/2,(c.height-560*sc)/2);g.scale(sc,sc);
- const enter=rhEase(t/.65),out=1-rhEase((t-7.1)/1.4),alpha=enter*out;
- g.save();g.globalAlpha=alpha;
- const sky=g.createRadialGradient(550,165,5,550,165,400);sky.addColorStop(0,'rgba(191,213,232,.44)');sky.addColorStop(.27,'rgba(84,120,159,.22)');sky.addColorStop(1,'transparent');g.fillStyle=sky;g.fillRect(150,-180,800,800);
- // Camera advances through the valley while mist moves independently.
- g.save();const cam=1+.075*rhEase(t/5);g.translate(550,280);g.scale(cam,cam);g.drawImage(rhLandscape,-550,-280);g.restore();
- for(let i=0;i<7;i++){
-  const x=180+i*125+Math.sin(t*.35+i)*45,y=305+i%3*36;
-  g.save();g.translate(x,y);g.scale(1,.20);const fog=g.createRadialGradient(0,0,0,0,0,180);fog.addColorStop(0,'rgba(159,187,215,.14)');fog.addColorStop(1,'transparent');g.fillStyle=fog;g.fillRect(-180,-180,360,360);g.restore();
- }
- // Flock arrives from the distant horizon in progressively closer waves.
- for(let i=0;i<53;i++){
-  const seed=i*31+7,delay=rhRand(seed)*2.6,travel=(t-delay)/3.1;
-  if(travel<=0||travel>=1.3)continue;
-  const p=rhClamp(travel),d=p*p,side=rhRand(seed+1)*2-1,lane=rhRand(seed+2),x=550+side*(30+570*d)+Math.sin(p*6+i)*24*d,y=220-lane*35-(40+170*lane)*d;
-  const z=.10+2.25*d*(.55+rhRand(seed+3)*.7),a=rhEase(travel/.15)*(1-rhEase((travel-.93)/.37));
-  rhBird(g,x,y,z,t*(7+rhRand(seed+4)*5)+i*.77,side*.16,a);
- }
- // Reveal typography as the flock passes, with no shared font, gradient or electric effect.
- const a=rhEase((t-1.7)/.9),hold=out;
- g.save();g.globalAlpha*=a;g.textAlign='center';g.textBaseline='middle';
- const shade=g.createRadialGradient(550,290,55,550,290,290);shade.addColorStop(0,'rgba(4,9,20,.86)');shade.addColorStop(1,'transparent');g.fillStyle=shade;g.fillRect(260,0,580,560);
- function lettering(text,y,size,spacing,color){
-  g.font='900 '+size+'px Impact, Haettenschweiler, "Arial Narrow", sans-serif';
-  let w=0;for(const ch of text)w+=g.measureText(ch).width+spacing;let x=550-(w-spacing)/2;
-  g.textAlign='left';g.fillStyle=color;g.strokeStyle='#0a1220';g.lineWidth=2.5;
-  for(const ch of text){g.strokeText(ch,x,y);g.fillText(ch,x,y);x+=g.measureText(ch).width+spacing;}g.textAlign='center';
- }
- lettering('R A I D',138,28,3,'#cedce8');
- let name=username.toUpperCase(),fs=78;do{g.font='900 '+fs+'px Impact, Haettenschweiler, "Arial Narrow", sans-serif';if(g.measureText(name).width+name.length*2<900)break;fs-=2}while(fs>15);
- lettering(name,205,fs,2,'#f2f5f7');
- g.fillStyle='#bd344a';const line=rhEase((t-2.4)/.65)*190;g.fillRect(550-line,254,line*2,3);
- const count=bitAmount===null?'UNA COMUNIDAD':String(bitAmount);
- lettering(count,315,bitAmount===null?35:91,bitAmount===null?2:1,'#f2f5f7');
- lettering(bitAmount===null?'LLEGA AL HORIZONTE':bitAmount===1?'ESPECTADOR':'ESPECTADORES',374,23,3,'#b7cbe0');
- g.font='500 23px "Trebuchet MS",sans-serif';g.fillStyle='#e2e9f0';g.fillText('Gracias por volar hasta aquí.',550,420);
- g.restore();g.restore();
+ if(t>=T){raidTrack.pause();raidTrack.currentTime=0;start=-1;testButtons.forEach(b=>b.disabled=false);return}
+ requestAnimationFrame(raidFrame);raidTrack.volume=muted?0:.12*(1-rdEase((t-7.2)/1.3));
+ const scale=Math.min(c.width/1100,c.height/560);g.translate((c.width-1100*scale)/2,(c.height-560*scale)/2);g.scale(scale,scale);
+ const end=1-rdEase((t-7.15)/1.35),rise=rdEase((t-.45)/1.5);
+ g.save();g.globalAlpha=end;
+ const light=g.createRadialGradient(550,235,20,550,235,370);light.addColorStop(0,'rgba(255,185,87,.28)');light.addColorStop(.38,'rgba(182,48,25,.16)');light.addColorStop(1,'transparent');g.fillStyle=light;g.fillRect(180,-135,740,740);
+ // The community arrives as individual feathers and assembles into the host's wings.
+ for(let i=0;i<68;i++){const seed=i*41+7,delay=rdRand(seed)*.9,p=rdClamp((t-delay)/1.8);if(p<=0||p>=1)continue;const a=rdRand(seed+1)*Math.PI*2,rad=(1-rdEase(p))*(310+rdRand(seed+2)*420),x=550+Math.cos(a+p*.8)*rad,y=245+Math.sin(a+p*.8)*rad*.55;g.save();g.globalAlpha*=Math.sin(Math.PI*p);g.translate(x,y);g.rotate(a+p*3);const h=22+rdRand(seed+3)*48;g.drawImage(rdFeathers,-h*.35,-h*.5,h*.7,h);g.restore()}
+ g.save();g.globalAlpha*=rise;g.translate(550,260);let spread=.32+.68*rise;g.scale(spread,1+.022*Math.sin(t*2.7));g.drawImage(rdWing,-550,-260);g.restore();
+ if(img.complete&&img.naturalWidth){g.save();g.globalAlpha*=rise;const h=330,w=h*img.naturalWidth/img.naturalHeight;g.translate(550-w/2,37+(1-rise)*80+Math.sin(t*2)*2);g.shadowColor='#ee692c';g.shadowBlur=17;g.drawImage(img,0,0,w,h);g.restore()}
+ const show=rdEase((t-1.6)/.7);g.save();g.globalAlpha*=show;
+ const panel=g.createRadialGradient(550,402,35,550,402,420);panel.addColorStop(0,'rgba(13,8,8,.97)');panel.addColorStop(.65,'rgba(13,8,8,.75)');panel.addColorStop(1,'transparent');g.fillStyle=panel;g.fillRect(130,280,840,260);
+ g.textAlign='center';g.textBaseline='middle';g.font='600 18px Copperplate, Georgia, serif';g.fillStyle='#e9b375';g.fillText('✦  LA COMUNIDAD SE ELEVA  ✦',550,342);
+ let fs=56;do{g.font='bold '+fs+'px Copperplate, Georgia, serif';if(g.measureText(username).width<830)break;fs-=2}while(fs>14);g.fillStyle='#fff1db';g.fillText(username,550,389);
+ g.font='bold 30px Copperplate, Georgia, serif';g.fillStyle='#f4a952';g.fillText(bitAmount===null?'NUEVA RAID':bitAmount+(bitAmount===1?' ALMA SE UNE':' ALMAS SE UNEN'),550,442);
+ g.font='italic 21px Georgia, serif';g.fillStyle='#f8e6d0';g.fillText('Gracias por traer tu comunidad a SoyFeniix',550,485);g.restore();g.restore();
 }
 function startRaid(){backgroundMusic.pause();phoenixAudio.pause();followAudio.pause();clearTimeout(phoenixTimer);raidTrack.pause();raidTrack.currentTime=0;raidTrack.volume=.12;if(!muted)raidTrack.play().catch(e=>console.warn('[Raid audio]',e));requestAnimationFrame(raidFrame);}
 

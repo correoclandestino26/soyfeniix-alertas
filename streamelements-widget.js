@@ -374,69 +374,65 @@ function sound(){fireAudioPhase=0;backgroundMusic.pause();backgroundMusic.curren
 
 
 // RAID: independent cinematic reveal, using the original brand artwork.
+
+/* RAID — arrival through a living solar breach. Independent procedural artwork. */
+const raidHash=n=>{let x=Math.sin(n*127.1+311.7)*43758.5453123;return x-Math.floor(x)};
 function raidFrame(now){
  if(start<0||alertType!=='raid')return;
- const t=(now-start)/1000,duration=8.5;
+ const t=(now-start)/1000,T=8.5;
  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);
- if(t>=duration){followAudio.pause();start=-1;testButtons.forEach(btn=>btn.disabled=false);return}
+ if(t>=T){followAudio.pause();start=-1;testButtons.forEach(b=>b.disabled=false);return}
  requestAnimationFrame(raidFrame);
  const s=Math.min(c.width/1100,c.height/560);g.translate((c.width-1100*s)/2,(c.height-560*s)/2);g.scale(s,s);
- const end=1-smooth((t-7.35)/1.15), reveal=smooth((t-.8)/1.05), impact=Math.exp(-Math.pow((t-1.45)/.32,2)), tick=Math.floor(t*15);
- g.save();g.globalAlpha=end;
- // Layered firelight, without a rectangular backdrop.
- glow(335,270,280,'#ff541c38',reveal);glow(490,230,260,'#9755ff26',reveal);glow(335,280,170,'#ffbd5550',impact);
- // Individual incoming streams converge on the original phoenix emblem.
- for(let i=0;i<90;i++){
-  const seed=i*71+932,delay=r(seed+1)*.95,p=cl((t-delay)/1.35);
-  if(p<=0||p>=1)continue;
-  const a=r(seed+2)*Math.PI*2,rad=230+r(seed+3)*470,curve=(1-p)*1.3*(i%2?1:-1);
-  const trail=[];
-  for(let j=0;j<15;j++){const u=cl(p-j*.022),rr=rad*Math.pow(1-u,1.45),aa=a+curve+(1-u)*.7;trail.push([335+Math.cos(aa)*rr,255+Math.sin(aa)*rr*.52]);}
-  g.save();g.globalAlpha*=Math.sin(Math.PI*p)*(.25+r(seed+5)*.65);
-  stroke(trail,i%3===0?'#b686ff':'#ff923b',1+r(seed+7)*2.5,9);
-  stroke(trail.slice(0,5),'#fff1cf',.8,2);g.restore();
+ const open=smooth(t/1.45)*(1-smooth((t-7.15)/1.35)),fade=1-smooth((t-7.4)/1.1),cx=350,cy=276;
+ g.save();g.globalAlpha=fade;
+ // Volumetric, uneven plasma aperture: hundreds of overlapping wisps, not solid shapes.
+ g.save();g.globalCompositeOperation='lighter';
+ for(let i=0;i<210;i++){
+  const a=i/210*Math.PI*2+t*.16, n=raidHash(i+4), v=raidHash(i+216);
+  const radius=(119+17*Math.sin(a*7+t*3)+9*Math.sin(a*13-t*2))*open;
+  const x=cx+Math.cos(a)*radius*.73,y=cy+Math.sin(a)*radius*1.4;
+  const q=13+v*32;
+  const h=g.createRadialGradient(x,y,0,x,y,q);
+  h.addColorStop(0,i%5===0?'rgba(177,93,255,.18)':'rgba(255,137,43,.15)');
+  h.addColorStop(.3,i%5===0?'rgba(94,39,205,.10)':'rgba(212,52,12,.10)');h.addColorStop(1,'rgba(0,0,0,0)');
+  g.globalAlpha=fade*open*(.4+n*.6);g.fillStyle=h;g.fillRect(x-q,y-q,q*2,q*2);
  }
- // Actual detailed sculpted phoenix, not a constructed geometric icon.
- if(phoenixReady){
-  g.save();g.globalAlpha*=reveal;g.translate(330,246+Math.sin(t*2)*2);
-  const z=.82+.18*ease((t-.65)/1.3);g.scale(z,z);
-  g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
-  g.shadowColor='#ff6c29';g.shadowBlur=28+impact*22;
-  g.drawImage(phoenixLight,-260,-175,520,350);g.shadowBlur=0;g.drawImage(phoenixLight,-260,-175,520,350);g.restore();
+ // Turbulent filaments have an incandescent core and broad colored scattering.
+ for(let k=0;k<24;k++){
+  const a0=k*2.39996+t*.22,span=.42+raidHash(k+19)*1.2;
+  g.beginPath();
+  for(let j=0;j<=65;j++){const a=a0+span*j/65,rad=(120+7*k/24+9*Math.sin(a*8+t*3+k*.2)+5*Math.sin(a*21-t*4))*open;
+   const x=cx+Math.cos(a)*rad*.73,y=cy+Math.sin(a)*rad*1.4;if(j===0)g.moveTo(x,y);else g.lineTo(x,y);}
+  g.globalAlpha=fade*open*(.13+raidHash(k+8)*.35);g.strokeStyle=k%4===0?'#ab70ff':'#ff6727';g.lineWidth=3.6;g.shadowColor=g.strokeStyle;g.shadowBlur=18;g.stroke();
+  g.globalAlpha*=.65;g.strokeStyle='#fff0c6';g.lineWidth=.65;g.shadowBlur=2;g.stroke();
  }
- // Original illustrated character, reintroduced as host welcoming the arriving community.
- if(img.complete&&img.naturalWidth){
-  g.save();g.globalAlpha*=smooth((t-1.15)/.95);
-  const h=385,w=h*img.naturalWidth/img.naturalHeight;
-  g.translate(80+(1-reveal)*-45,480-h+Math.sin(t*2.4)*1.5);
-  g.shadowColor='#f96b27';g.shadowBlur=17;g.drawImage(img,0,0,w,h);g.restore();
- }
- // Fine branching electrical discharges and drifting hot embers.
- for(let i=0;i<5;i++){
-  const a=i*1.256+t*.31,from=[335+Math.cos(a)*205,250+Math.sin(a)*130],to=[335+Math.cos(a+.58)*150,250+Math.sin(a+.58)*112];
-  electric(arc(from,to,580+i*31+tick*97,55),reveal*(.16+.32*r(tick*17+i)),i%2?'#a88aff':'#ff9b42');
- }
- for(let i=0;i<84;i++){
-  const seed=i*59+42,age=(t*(.25+r(seed)*.22)+r(seed+2))%1;
-  const a=r(seed+4)*Math.PI*2,rad=30+age*(100+r(seed+6)*270);
-  ember(335+Math.cos(a)*rad,280+Math.sin(a)*rad*.53-age*60,1+r(seed+8)*2.1,1-age,reveal*Math.sin(age*Math.PI)*.7,seed,age);
- }
- // Cinematic typography, independent of the Follow/Sub layouts.
- const tr=smooth((t-1.65)/.8),cx=760;
- g.save();g.globalAlpha*=tr;g.translate((1-tr)*34,0);
- g.textAlign='center';g.textBaseline='middle';
- glow(cx,285,255,'#10091d99',.75);
- g.font='italic 900 27px Arial';g.fillStyle=metal(164,27,true);g.shadowColor='#ff701f';g.shadowBlur=10;g.fillText('NUEVA RAID',cx,164);
- let fs=56;do{g.font='italic 900 '+fs+'px Arial';if(g.measureText(username).width<=560)break;fs-=2}while(fs>15);
- g.fillStyle=metal(229,fs);g.shadowColor='#ff8c30';g.shadowBlur=13;g.fillText(username,cx,229);g.shadowBlur=0;
- const lineY=268;const lg=g.createLinearGradient(cx-250,0,cx+250,0);lg.addColorStop(0,'transparent');lg.addColorStop(.5,'#ffba65');lg.addColorStop(1,'transparent');g.fillStyle=lg;g.fillRect(cx-250,lineY,500,2);
- g.font='italic 600 26px Arial';g.fillStyle='#f5e6ff';g.fillText('Nos trae a su comunidad',cx,302);
- g.font='italic 900 44px Arial';g.fillStyle=metal(353,44,true);g.shadowColor='#ff8c30';g.shadowBlur=9;g.fillText(bitAmount===null?'¡Bienvenidos!':bitAmount+(bitAmount===1?' espectador':' espectadores'),cx,353);
- g.shadowBlur=0;g.font='600 21px Arial';g.fillStyle='#fff0dc';g.fillText('Gracias por la raid',cx,404);
- g.font='italic 900 25px Arial';g.fillStyle=metal(440,25,true);g.fillText('SoyFeniix',cx,440);g.restore();
- // Final dispersal is made of sparks rather than a disappearing panel.
- if(t>7){for(let i=0;i<45;i++){let u=cl((t-7)/1.5),a=i*2.39996;ember(550+Math.cos(a)*(70+u*440),270+Math.sin(a)*(40+u*180),2+r(i+10)*2,1-u,(1-u)*.85,i+82,u)}}
  g.restore();
+ // Perspective procession: individual living light signatures emerge from the breach.
+ g.save();g.globalCompositeOperation='lighter';
+ for(let i=0;i<155;i++){
+  const seed=i*17+7,delay=.55+raidHash(seed)*3.3,p=(t-delay)/(1.35+raidHash(seed+2)*1.9);
+  if(p<0||p>1)continue;
+  const lane=raidHash(seed+3)*2-1,side=raidHash(seed+5)*2-1;
+  const pos=u=>{u=cl(u);let d=u*u;return [cx+side*18+u*150+d*430,cy+lane*(15+145*d)+Math.sin(u*4+seed)*12*u];};
+  const pt=pos(p),opacity=Math.sin(Math.PI*p)*fade,rad=(1.5+6*p)*(.5+raidHash(seed+8));
+  g.globalAlpha=opacity*.65;g.strokeStyle=i%4===0?'#c28aff':'#ff9b4a';g.lineWidth=rad*.45;g.shadowColor=g.strokeStyle;g.shadowBlur=rad*2;g.beginPath();
+  for(let j=10;j>=0;j--){const a=pos(p-j*.009);if(j===10)g.moveTo(...a);else g.lineTo(...a)}g.stroke();
+  const h=g.createRadialGradient(pt[0],pt[1],0,pt[0],pt[1],rad*3);h.addColorStop(0,'#fff9df');h.addColorStop(.15,i%4===0?'#d5aaff':'#ffd091');h.addColorStop(1,'transparent');g.fillStyle=h;g.fillRect(pt[0]-rad*3,pt[1]-rad*3,rad*6,rad*6);
+ }
+ g.restore();
+ // A physical-looking metallic title, illuminated by the breach, with no box.
+ const a=smooth((t-1.55)/.75)*fade;
+ g.save();g.globalAlpha=a;g.translate(0,(1-a)*10);g.textAlign='center';g.textBaseline='middle';
+ const tx=720;
+ const haze=g.createRadialGradient(tx,280,35,tx,280,300);haze.addColorStop(0,'rgba(10,5,19,.92)');haze.addColorStop(.55,'rgba(10,5,19,.75)');haze.addColorStop(1,'transparent');g.fillStyle=haze;g.fillRect(tx-300,-20,600,600);
+ const type=(label,y,size,weight,gold)=>{g.font=weight+' '+size+'px Arial';const grad=g.createLinearGradient(0,y-size*.5,0,y+size*.5);grad.addColorStop(0,'#fffaf0');grad.addColorStop(.42,gold?'#ffc878':'#e4e8f1');grad.addColorStop(.51,gold?'#aa4f18':'#777d92');grad.addColorStop(.7,gold?'#ffc36d':'#f9f8ff');grad.addColorStop(1,gold?'#e48431':'#c1bfd6');g.fillStyle=grad;g.shadowColor='#000';g.shadowBlur=9;g.fillText(label,tx,y);g.shadowBlur=0;};
+ type('RAID ENTRANTE',160,24,800,true);
+ let fs=62;do{g.font='900 '+fs+'px Arial';if(g.measureText(username).width<555)break;fs-=2}while(fs>14);type(username,222,fs,900,false);
+ type(bitAmount===null?'UNA NUEVA COMUNIDAD':bitAmount+(bitAmount===1?' ESPECTADOR':' ESPECTADORES'),310,bitAmount===null?23:33,900,true);
+ g.font='500 23px Arial';g.fillStyle='#f0e2ff';g.fillText('Gracias por compartir tu comunidad',tx,367);
+ g.font='700 19px Arial';g.fillStyle='#ffd6a1';g.fillText('BIENVENIDOS A SOYFENIIX',tx,405);
+ g.restore();g.restore();
 }
 function startRaid(){backgroundMusic.pause();phoenixAudio.pause();clearTimeout(phoenixTimer);followAudio.pause();followAudio.currentTime=0;followAudio.volume=electricVolume;if(!muted)followAudio.play().catch(()=>{});requestAnimationFrame(raidFrame);}
 

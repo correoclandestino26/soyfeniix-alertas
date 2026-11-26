@@ -372,34 +372,70 @@ const subMusic=new Audio('https://correoclandestino26.github.io/soyfeniix-alerta
 const backgroundMusic=new Audio('https://correoclandestino26.github.io/soyfeniix-alertas/melodia_alerta_limpia.mp3');backgroundMusic.preload='auto';backgroundMusic.volume=.25;
 function sound(){fireAudioPhase=0;backgroundMusic.pause();backgroundMusic.currentTime=0;if(!muted)backgroundMusic.play().catch(error=>console.warn('[SoyFeniix audio] backgroundMusic',error.name,error.message,'overlay='+!preview,'autoplay permitido='+((document.permissionsPolicy||document.featurePolicy)?.allowsFeature('autoplay')??'desconocido')));clearTimeout(phoenixTimer);phoenixAudio.pause();phoenixAudio.currentTime=0;followAudio.pause();followAudio.currentTime=0;followAudio.volume=electricVolume;if(muted)return;followAudio.play().catch(error=>console.warn('[SoyFeniix audio] followAudio',error.name,error.message,'overlay='+!preview,'autoplay permitido='+((document.permissionsPolicy||document.featurePolicy)?.allowsFeature('autoplay')??'desconocido')));phoenixTimer=setTimeout(()=>{if(!muted)phoenixAudio.play().catch(error=>console.warn('[SoyFeniix audio] phoenixAudio',error.name,error.message,'overlay='+!preview,'autoplay permitido='+((document.permissionsPolicy||document.featurePolicy)?.allowsFeature('autoplay')??'desconocido')));},Math.round((FIRE+.75)*1000));}
 
+
+// RAID: independent cinematic reveal, using the original brand artwork.
 function raidFrame(now){
  if(start<0||alertType!=='raid')return;
- const t=(now-start)/1000, duration=8.5;
+ const t=(now-start)/1000,duration=8.5;
  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);
  if(t>=duration){followAudio.pause();start=-1;testButtons.forEach(btn=>btn.disabled=false);return}
  requestAnimationFrame(raidFrame);
  const s=Math.min(c.width/1100,c.height/560);g.translate((c.width-1100*s)/2,(c.height-560*s)/2);g.scale(s,s);
- const end=cl((duration-t)/.8), reveal=smooth((t-1.15)/.85);
+ const end=1-smooth((t-7.35)/1.15), reveal=smooth((t-.8)/1.05), impact=Math.exp(-Math.pow((t-1.45)/.32,2)), tick=Math.floor(t*15);
  g.save();g.globalAlpha=end;
- for(let i=0;i<38;i++){
-  const a=i*2.399963, p=cl((t-i*.032)/1.7), r=(1-ease(p))*490+24, x=550+Math.cos(a)*r,y=210+Math.sin(a)*r*.55;
+ // Layered firelight, without a rectangular backdrop.
+ glow(335,270,280,'#ff541c38',reveal);glow(490,230,260,'#9755ff26',reveal);glow(335,280,170,'#ffbd5550',impact);
+ // Individual incoming streams converge on the original phoenix emblem.
+ for(let i=0;i<90;i++){
+  const seed=i*71+932,delay=r(seed+1)*.95,p=cl((t-delay)/1.35);
   if(p<=0||p>=1)continue;
-  g.strokeStyle=i%3===0?'#b76cff':'#ff982e';g.shadowColor=g.strokeStyle;g.shadowBlur=16;g.lineWidth=2.6;
-  g.beginPath();g.moveTo(x,y);g.lineTo(x+Math.cos(a)*50,y+Math.sin(a)*32);g.stroke();
+  const a=r(seed+2)*Math.PI*2,rad=230+r(seed+3)*470,curve=(1-p)*1.3*(i%2?1:-1);
+  const trail=[];
+  for(let j=0;j<15;j++){const u=cl(p-j*.022),rr=rad*Math.pow(1-u,1.45),aa=a+curve+(1-u)*.7;trail.push([335+Math.cos(aa)*rr,255+Math.sin(aa)*rr*.52]);}
+  g.save();g.globalAlpha*=Math.sin(Math.PI*p)*(.25+r(seed+5)*.65);
+  stroke(trail,i%3===0?'#b686ff':'#ff923b',1+r(seed+7)*2.5,9);
+  stroke(trail.slice(0,5),'#fff1cf',.8,2);g.restore();
  }
- g.shadowBlur=0;
- const pulse=1+.018*Math.sin(t*5), wing=smooth((t-.8)/1.1);
- g.save();g.translate(550,205);g.scale(pulse,pulse);g.globalAlpha*=wing;
- const halo=g.createRadialGradient(0,0,10,0,0,245);halo.addColorStop(0,'rgba(255,132,36,.27)');halo.addColorStop(.5,'rgba(162,65,255,.13)');halo.addColorStop(1,'rgba(255,90,20,0)');g.fillStyle=halo;g.fillRect(-245,-245,490,490);
- for(let side of [-1,1]){g.save();g.scale(side,1);g.rotate(.035*Math.sin(t*4));for(let j=0;j<9;j++){let len=205-j*15, rise=90-j*9;g.beginPath();g.moveTo(12,28);g.bezierCurveTo(65,-40,len*.65,-rise,len,-rise-35);g.bezierCurveTo(len*.79,-rise+30,80,57+j*4,19,54);g.closePath();let gr=g.createLinearGradient(0,60,len,-rise);gr.addColorStop(0,'#ffdf85');gr.addColorStop(.34,'#ff9b28');gr.addColorStop(.75,'#e34a26');gr.addColorStop(1,'#ad56ff');g.fillStyle=gr;g.shadowColor='#ff6b26';g.shadowBlur=12;g.globalAlpha=wing*end*(1-j*.055);g.fill();}g.restore()}
- g.globalAlpha=wing*end;g.shadowColor='#ff982c';g.shadowBlur=20;g.fillStyle='#ffe7a6';g.beginPath();g.moveTo(0,-58);g.quadraticCurveTo(34,-50,16,-23);g.lineTo(42,-19);g.lineTo(12,-7);g.quadraticCurveTo(31,39,0,91);g.quadraticCurveTo(-31,39,-12,-7);g.quadraticCurveTo(-23,-41,0,-58);g.fill();g.restore();
- g.globalAlpha=end*reveal;g.shadowBlur=0;
- let plate=g.createLinearGradient(190,0,910,0);plate.addColorStop(0,'rgba(20,11,32,0)');plate.addColorStop(.18,'rgba(18,10,28,.93)');plate.addColorStop(.82,'rgba(18,10,28,.93)');plate.addColorStop(1,'rgba(20,11,32,0)');g.fillStyle=plate;g.fillRect(190,308,720,158);
- g.strokeStyle='#ffad43';g.lineWidth=2;g.beginPath();g.moveTo(245,308);g.lineTo(855,308);g.moveTo(245,466);g.lineTo(855,466);g.stroke();
- g.textAlign='center';g.textBaseline='middle';g.font='700 22px Arial';g.fillStyle='#ffd28a';g.fillText('NUEVA RAID',550,329);
- let fs=52;do{g.font='900 '+fs+'px Arial';if(g.measureText(username).width<=610)break;fs-=2}while(fs>16);g.fillStyle='#fff5e2';g.shadowColor='#ff7b27';g.shadowBlur=14;g.fillText(username,550,376);g.shadowBlur=0;
- g.font='600 26px Arial';g.fillStyle='#ffcf84';g.fillText(bitAmount===null?'¡Bienvenida, comunidad!':'Nos visita con '+bitAmount+(bitAmount===1?' espectador':' espectadores'),550,421);
- g.font='500 19px Arial';g.fillStyle='#e3d0ff';g.fillText('Gracias por traer tu comunidad a SoyFeniix',550,450);
+ // Actual detailed sculpted phoenix, not a constructed geometric icon.
+ if(phoenixReady){
+  g.save();g.globalAlpha*=reveal;g.translate(330,246+Math.sin(t*2)*2);
+  const z=.82+.18*ease((t-.65)/1.3);g.scale(z,z);
+  g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
+  g.shadowColor='#ff6c29';g.shadowBlur=28+impact*22;
+  g.drawImage(phoenixLight,-260,-175,520,350);g.shadowBlur=0;g.drawImage(phoenixLight,-260,-175,520,350);g.restore();
+ }
+ // Original illustrated character, reintroduced as host welcoming the arriving community.
+ if(img.complete&&img.naturalWidth){
+  g.save();g.globalAlpha*=smooth((t-1.15)/.95);
+  const h=385,w=h*img.naturalWidth/img.naturalHeight;
+  g.translate(80+(1-reveal)*-45,480-h+Math.sin(t*2.4)*1.5);
+  g.shadowColor='#f96b27';g.shadowBlur=17;g.drawImage(img,0,0,w,h);g.restore();
+ }
+ // Fine branching electrical discharges and drifting hot embers.
+ for(let i=0;i<5;i++){
+  const a=i*1.256+t*.31,from=[335+Math.cos(a)*205,250+Math.sin(a)*130],to=[335+Math.cos(a+.58)*150,250+Math.sin(a+.58)*112];
+  electric(arc(from,to,580+i*31+tick*97,55),reveal*(.16+.32*r(tick*17+i)),i%2?'#a88aff':'#ff9b42');
+ }
+ for(let i=0;i<84;i++){
+  const seed=i*59+42,age=(t*(.25+r(seed)*.22)+r(seed+2))%1;
+  const a=r(seed+4)*Math.PI*2,rad=30+age*(100+r(seed+6)*270);
+  ember(335+Math.cos(a)*rad,280+Math.sin(a)*rad*.53-age*60,1+r(seed+8)*2.1,1-age,reveal*Math.sin(age*Math.PI)*.7,seed,age);
+ }
+ // Cinematic typography, independent of the Follow/Sub layouts.
+ const tr=smooth((t-1.65)/.8),cx=760;
+ g.save();g.globalAlpha*=tr;g.translate((1-tr)*34,0);
+ g.textAlign='center';g.textBaseline='middle';
+ glow(cx,285,255,'#10091d99',.75);
+ g.font='italic 900 27px Arial';g.fillStyle=metal(164,27,true);g.shadowColor='#ff701f';g.shadowBlur=10;g.fillText('NUEVA RAID',cx,164);
+ let fs=56;do{g.font='italic 900 '+fs+'px Arial';if(g.measureText(username).width<=560)break;fs-=2}while(fs>15);
+ g.fillStyle=metal(229,fs);g.shadowColor='#ff8c30';g.shadowBlur=13;g.fillText(username,cx,229);g.shadowBlur=0;
+ const lineY=268;const lg=g.createLinearGradient(cx-250,0,cx+250,0);lg.addColorStop(0,'transparent');lg.addColorStop(.5,'#ffba65');lg.addColorStop(1,'transparent');g.fillStyle=lg;g.fillRect(cx-250,lineY,500,2);
+ g.font='italic 600 26px Arial';g.fillStyle='#f5e6ff';g.fillText('Nos trae a su comunidad',cx,302);
+ g.font='italic 900 44px Arial';g.fillStyle=metal(353,44,true);g.shadowColor='#ff8c30';g.shadowBlur=9;g.fillText(bitAmount===null?'¡Bienvenidos!':bitAmount+(bitAmount===1?' espectador':' espectadores'),cx,353);
+ g.shadowBlur=0;g.font='600 21px Arial';g.fillStyle='#fff0dc';g.fillText('Gracias por la raid',cx,404);
+ g.font='italic 900 25px Arial';g.fillStyle=metal(440,25,true);g.fillText('SoyFeniix',cx,440);g.restore();
+ // Final dispersal is made of sparks rather than a disappearing panel.
+ if(t>7){for(let i=0;i<45;i++){let u=cl((t-7)/1.5),a=i*2.39996;ember(550+Math.cos(a)*(70+u*440),270+Math.sin(a)*(40+u*180),2+r(i+10)*2,1-u,(1-u)*.85,i+82,u)}}
  g.restore();
 }
 function startRaid(){backgroundMusic.pause();phoenixAudio.pause();clearTimeout(phoenixTimer);followAudio.pause();followAudio.currentTime=0;followAudio.volume=electricVolume;if(!muted)followAudio.play().catch(()=>{});requestAnimationFrame(raidFrame);}

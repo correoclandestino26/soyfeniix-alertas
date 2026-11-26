@@ -374,58 +374,98 @@ function sound(){fireAudioPhase=0;backgroundMusic.pause();backgroundMusic.curren
 
 
 
-/* RAID — the assembly. Custom engraved concert-poster aesthetic, no shared art or effects. */
+
+/* RAID — HORIZON. New artwork, motion, palette and typography. */
 const raidTrack=new Audio('https://correoclandestino26.github.io/soyfeniix-alertas/metallica-unforgiven.mp3');
 raidTrack.preload='auto';raidTrack.volume=.12;
-const raidLimit=x=>Math.min(1,Math.max(0,x)),raidEase=x=>{x=raidLimit(x);return x*x*(3-2*x)};
-const raidRandom=i=>{const x=Math.sin(i*91.773+12.7)*43758.5453;return x-Math.floor(x)};
-const raidArt=document.createElement('canvas');raidArt.width=1100;raidArt.height=560;
+const rhClamp=x=>Math.max(0,Math.min(1,x)),rhEase=x=>{x=rhClamp(x);return x*x*(3-2*x)};
+const rhRand=n=>{const v=Math.sin(n*78.233+41.719)*43758.5453;return v-Math.floor(v)};
+const rhW=1100,rhH=560;
+const rhLandscape=document.createElement('canvas');rhLandscape.width=rhW;rhLandscape.height=rhH;
 (function(){
- const p=raidArt.getContext('2d');
- // An engraved live-concert crowd, hand constructed from individual silhouettes.
- for(let row=0;row<5;row++){
-  const n=15-row*2;
-  for(let i=0;i<n;i++){
-   const k=row*100+i,x=90+i*920/(n-1)+(raidRandom(k)-.5)*28,y=270+row*36+raidRandom(k+1)*19,z=.48+row*.22+raidRandom(k+3)*.22;
-   p.save();p.translate(x,y);p.scale(z,z);
-   p.fillStyle=['#33504d','#263b39','#1d3030','#162625','#0e191b'][row];p.strokeStyle=['#72988a','#55796d','#527b70','#6c9682','#8eb39d'][row];p.lineWidth=1.15;
-   p.beginPath();p.moveTo(-35,77);p.quadraticCurveTo(-29,10,-16,1);p.quadraticCurveTo(-23,-13,-15,-32);p.bezierCurveTo(-4,-44,17,-40,20,-24);p.quadraticCurveTo(24,-8,13,1);p.quadraticCurveTo(31,10,36,77);p.closePath();p.fill();p.stroke();
-   if(raidRandom(k+6)>.4){let d=raidRandom(k+7)>.5?1:-1;p.beginPath();p.moveTo(d*22,34);p.quadraticCurveTo(d*43,0,d*35,-30);p.lineTo(d*29,-62);p.quadraticCurveTo(d*29,-69,d*35,-67);p.lineTo(d*42,-38);p.quadraticCurveTo(d*52,-4,d*35,46);p.closePath();p.fill();p.stroke();}
-   p.globalAlpha=.28;for(let j=0;j<10;j++){p.beginPath();p.moveTo(-20+j*4,19);p.lineTo(-28+j*5,63);p.stroke();}p.restore();
+ const p=rhLandscape.getContext('2d');
+ // A storm-lit mountain range, built from irregular ridges, rock strata and atmospheric depth.
+ for(let layer=0;layer<5;layer++){
+  const base=277+layer*36, peaks=[];
+  for(let x=-10;x<=1110;x+=4){
+   const z=x/1100;
+   const envelope=Math.pow(Math.abs(z-.5)*2,.68);
+   const y=base-envelope*(77+layer*17)-Math.abs(Math.sin(x*.009+layer*3.5))*35-Math.abs(Math.sin(x*.023+layer*1.7))*20-(rhRand(x+layer*900)-.5)*12;
+   peaks.push([x,y]);
   }
+  p.beginPath();p.moveTo(-10,560);for(const pt of peaks)p.lineTo(...pt);p.lineTo(1110,560);p.closePath();
+  let gr=p.createLinearGradient(0,base-160,0,560);
+  gr.addColorStop(0,['#718aab','#4c6687','#334764','#1d2c46','#101b30'][layer]);
+  gr.addColorStop(.65,['#263a58','#26354f','#192b42','#152236','#0b1425'][layer]);gr.addColorStop(1,'#080e19');p.fillStyle=gr;p.fill();
+  p.save();p.clip();
+  for(let i=0;i<280;i++){
+   const k=i+layer*500,x=rhRand(k*3+1)*1100,y=peaks[Math.min(peaks.length-1,Math.floor((x+10)/4))][1]+rhRand(k*3+2)*90,len=8+rhRand(k*3+3)*65;
+   p.strokeStyle=i%4===0?'rgba(177,198,222,.22)':'rgba(5,13,30,.20)';p.lineWidth=.5+rhRand(k+4)*1.3;p.beginPath();p.moveTo(x,y);p.lineTo(x-9-len*.27,y+len);p.stroke();
+  }p.restore();
  }
- // Texture on the crowd only, calculated once.
- p.globalCompositeOperation='source-atop';for(let i=0;i<17000;i++){p.fillStyle=i%2?'rgba(187,215,195,.10)':'rgba(0,0,0,.18)';p.fillRect(raidRandom(i*3+901)*1100,raidRandom(i*3+902)*560,1.2,.7);}
- p.globalCompositeOperation='destination-in';const mask=p.createLinearGradient(0,240,0,540);mask.addColorStop(0,'transparent');mask.addColorStop(.24,'#fff');mask.addColorStop(.73,'#fff');mask.addColorStop(1,'transparent');p.fillStyle=mask;p.fillRect(0,0,1100,560);
+ // Soft-edged scene, suitable for an overlay rather than a rectangular video panel.
+ p.globalCompositeOperation='destination-in';
+ const mask=p.createRadialGradient(550,310,135,550,310,520);mask.addColorStop(0,'#fff');mask.addColorStop(.68,'#fff');mask.addColorStop(1,'transparent');p.fillStyle=mask;p.fillRect(0,0,1100,560);
+ const v=p.createLinearGradient(0,0,0,560);v.addColorStop(0,'#fff');v.addColorStop(.7,'#fff');v.addColorStop(1,'transparent');p.fillStyle=v;p.fillRect(0,0,1100,560);
 })();
+function rhBird(p,x,y,z,phase,angle,alpha){
+ p.save();p.translate(x,y);p.rotate(angle);p.scale(z,z);p.globalAlpha*=alpha;
+ const lift=Math.sin(phase)*22,tip=Math.sin(phase+.65)*10;
+ for(const side of [-1,1]){
+  p.save();p.scale(side,1);
+  p.beginPath();p.moveTo(1,-5);p.bezierCurveTo(15,-19-lift,33,-29-lift,58,-17-lift-tip);
+  p.bezierCurveTo(48,-11-lift,45,-7-lift,38,-5-lift);
+  for(let j=0;j<7;j++){let a=38-j*4.6,b=-5-lift+j*2.5;p.quadraticCurveTo(a+5,b+4,a-2,b+12+j*.7);p.lineTo(a-7,b+3);}
+  p.quadraticCurveTo(5,12,0,7);p.closePath();
+  let grad=p.createLinearGradient(0,-30-lift,0,25);grad.addColorStop(0,'#a9c7e2');grad.addColorStop(.20,'#354a63');grad.addColorStop(.6,'#0c1728');grad.addColorStop(1,'#040913');p.fillStyle=grad;p.fill();
+  p.strokeStyle='rgba(191,216,238,.5)';p.lineWidth=.65;p.beginPath();p.moveTo(2,-5);p.bezierCurveTo(17,-18-lift,33,-28-lift,58,-17-lift-tip);p.stroke();
+  p.restore();
+ }
+ p.fillStyle='#101a2a';p.beginPath();p.moveTo(-4,2);p.quadraticCurveTo(-6,-9,0,-11);p.quadraticCurveTo(6,-9,5,3);p.lineTo(9,19);p.lineTo(0,14);p.lineTo(-9,19);p.closePath();p.fill();p.restore();
+}
 function raidFrame(now){
  if(start<0||alertType!=='raid')return;
  const t=(now-start)/1000,T=8.5;
  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);
  if(t>=T){raidTrack.pause();raidTrack.currentTime=0;start=-1;testButtons.forEach(btn=>btn.disabled=false);return}
  requestAnimationFrame(raidFrame);
- if(muted)raidTrack.volume=0;else raidTrack.volume=.12*(1-raidEase((t-7.2)/1.3));
- const s=Math.min(c.width/1100,c.height/560);g.translate((c.width-1100*s)/2,(c.height-560*s)/2);g.scale(s,s);
- const appear=raidEase(t/.85),end=1-raidEase((t-7.3)/1.2),pop=raidEase((t-.65)/1.1);
- g.save();g.globalAlpha=appear*end;
- // Three stage spotlights, deliberately restrained and inexpensive to render.
- for(let i=0;i<3;i++){
-  const x=180+i*370+Math.sin(t*.85+i*2)*65;
-  const beam=g.createLinearGradient(x,25,x,460);beam.addColorStop(0,'rgba(173,222,196,.22)');beam.addColorStop(1,'rgba(64,113,104,0)');
-  g.fillStyle=beam;g.beginPath();g.moveTo(x-7,27);g.lineTo(x-185,460);g.lineTo(x+185,460);g.lineTo(x+7,27);g.fill();
+ raidTrack.volume=muted?0:.12*(1-rhEase((t-7.15)/1.35));
+ const sc=Math.min(c.width/1100,c.height/560);g.translate((c.width-1100*sc)/2,(c.height-560*sc)/2);g.scale(sc,sc);
+ const enter=rhEase(t/.65),out=1-rhEase((t-7.1)/1.4),alpha=enter*out;
+ g.save();g.globalAlpha=alpha;
+ const sky=g.createRadialGradient(550,165,5,550,165,400);sky.addColorStop(0,'rgba(191,213,232,.44)');sky.addColorStop(.27,'rgba(84,120,159,.22)');sky.addColorStop(1,'transparent');g.fillStyle=sky;g.fillRect(150,-180,800,800);
+ // Camera advances through the valley while mist moves independently.
+ g.save();const cam=1+.075*rhEase(t/5);g.translate(550,280);g.scale(cam,cam);g.drawImage(rhLandscape,-550,-280);g.restore();
+ for(let i=0;i<7;i++){
+  const x=180+i*125+Math.sin(t*.35+i)*45,y=305+i%3*36;
+  g.save();g.translate(x,y);g.scale(1,.20);const fog=g.createRadialGradient(0,0,0,0,0,180);fog.addColorStop(0,'rgba(159,187,215,.14)');fog.addColorStop(1,'transparent');g.fillStyle=fog;g.fillRect(-180,-180,360,360);g.restore();
  }
- g.save();g.globalAlpha*=pop;g.translate(0,45*(1-pop));g.drawImage(raidArt,0,0);g.restore();
- const z=raidEase((t-1.25)/.7);
- g.save();g.globalAlpha*=z;g.translate(0,-16*(1-z));g.textAlign='center';g.textBaseline='middle';
- // Editorial serif typography and bone-white ink, with a restrained jade accent.
- g.font='600 21px Georgia, serif';g.fillStyle='#a9cbbc';g.fillText('U N A   N U E V A   A L I A N Z A',550,91);
- let fs=68;do{g.font='bold '+fs+'px Georgia, serif';if(g.measureText(username).width<=910)break;fs-=2}while(fs>15);
- g.lineJoin='round';g.strokeStyle='#101c1c';g.lineWidth=6;g.strokeText(username,550,162);g.fillStyle='#eee9d8';g.fillText(username,550,162);
- g.font='italic 27px Georgia, serif';g.fillStyle='#bdcebf';g.fillText('ha abierto el camino',550,220);
- const count=bitAmount===null?'LA COMUNIDAD CRECE':String(bitAmount);
- g.font=bitAmount===null?'bold 27px Georgia, serif':'bold 78px Georgia, serif';g.strokeStyle='#132324';g.lineWidth=7;g.strokeText(count,550,299);g.fillStyle='#d9e9cb';g.fillText(count,550,299);
- g.font='600 19px Georgia, serif';g.fillStyle='#dce6d9';g.fillText(bitAmount===null?'':bitAmount===1?'PERSONA SE UNE A NOSOTROS':'PERSONAS SE UNEN A NOSOTROS',550,354);
- g.font='italic 26px Georgia, serif';g.strokeStyle='#101c1c';g.lineWidth=4;g.strokeText('Gracias por hacer crecer esta comunidad.',550,427);g.fillStyle='#f2ebd8';g.fillText('Gracias por hacer crecer esta comunidad.',550,427);
+ // Flock arrives from the distant horizon in progressively closer waves.
+ for(let i=0;i<53;i++){
+  const seed=i*31+7,delay=rhRand(seed)*2.6,travel=(t-delay)/3.1;
+  if(travel<=0||travel>=1.3)continue;
+  const p=rhClamp(travel),d=p*p,side=rhRand(seed+1)*2-1,lane=rhRand(seed+2),x=550+side*(30+570*d)+Math.sin(p*6+i)*24*d,y=220-lane*35-(40+170*lane)*d;
+  const z=.10+2.25*d*(.55+rhRand(seed+3)*.7),a=rhEase(travel/.15)*(1-rhEase((travel-.93)/.37));
+  rhBird(g,x,y,z,t*(7+rhRand(seed+4)*5)+i*.77,side*.16,a);
+ }
+ // Reveal typography as the flock passes, with no shared font, gradient or electric effect.
+ const a=rhEase((t-1.7)/.9),hold=out;
+ g.save();g.globalAlpha*=a;g.textAlign='center';g.textBaseline='middle';
+ const shade=g.createRadialGradient(550,290,55,550,290,290);shade.addColorStop(0,'rgba(4,9,20,.86)');shade.addColorStop(1,'transparent');g.fillStyle=shade;g.fillRect(260,0,580,560);
+ function lettering(text,y,size,spacing,color){
+  g.font='900 '+size+'px Impact, Haettenschweiler, "Arial Narrow", sans-serif';
+  let w=0;for(const ch of text)w+=g.measureText(ch).width+spacing;let x=550-(w-spacing)/2;
+  g.textAlign='left';g.fillStyle=color;g.strokeStyle='#0a1220';g.lineWidth=2.5;
+  for(const ch of text){g.strokeText(ch,x,y);g.fillText(ch,x,y);x+=g.measureText(ch).width+spacing;}g.textAlign='center';
+ }
+ lettering('R A I D',138,28,3,'#cedce8');
+ let name=username.toUpperCase(),fs=78;do{g.font='900 '+fs+'px Impact, Haettenschweiler, "Arial Narrow", sans-serif';if(g.measureText(name).width+name.length*2<900)break;fs-=2}while(fs>15);
+ lettering(name,205,fs,2,'#f2f5f7');
+ g.fillStyle='#bd344a';const line=rhEase((t-2.4)/.65)*190;g.fillRect(550-line,254,line*2,3);
+ const count=bitAmount===null?'UNA COMUNIDAD':String(bitAmount);
+ lettering(count,315,bitAmount===null?35:91,bitAmount===null?2:1,'#f2f5f7');
+ lettering(bitAmount===null?'LLEGA AL HORIZONTE':bitAmount===1?'ESPECTADOR':'ESPECTADORES',374,23,3,'#b7cbe0');
+ g.font='500 23px "Trebuchet MS",sans-serif';g.fillStyle='#e2e9f0';g.fillText('Gracias por volar hasta aquí.',550,420);
  g.restore();g.restore();
 }
 function startRaid(){backgroundMusic.pause();phoenixAudio.pause();followAudio.pause();clearTimeout(phoenixTimer);raidTrack.pause();raidTrack.currentTime=0;raidTrack.volume=.12;if(!muted)raidTrack.play().catch(e=>console.warn('[Raid audio]',e));requestAnimationFrame(raidFrame);}

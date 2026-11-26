@@ -388,26 +388,34 @@ function raidFrame(now){
  g.save();g.translate(550-230,90+(1-intro)*22);g.globalAlpha=intro*out;
  // One shared baseline and a softly vanishing local background, no secondary artwork.
  const bg=g.createLinearGradient(65,0,460,0);bg.addColorStop(0,'transparent');bg.addColorStop(.26,'rgba(15,12,18,.91)');bg.addColorStop(.86,'rgba(15,12,18,.88)');bg.addColorStop(1,'transparent');g.fillStyle=bg;g.fillRect(65,49,395,132);
- if(raidHero.complete&&raidHero.naturalWidth){g.save();g.globalAlpha*=intro;const h=210,w=h*raidHero.naturalWidth/raidHero.naturalHeight;g.drawImage(raidHero,6,0,w,h);g.restore()}
+ if(raidHero.complete&&raidHero.naturalWidth){g.save();g.globalAlpha*=intro;const h=238,w=h*raidHero.naturalWidth/raidHero.naturalHeight,ax=19,ay=-14;
+ const pulse=.86+.14*Math.sin(t*3.4);
+ g.save();g.translate(ax+w*.49,ay+h*.48);g.scale(.77,1.14);
+ const aura=g.createRadialGradient(0,0,12,0,0,112);
+ aura.addColorStop(0,'rgba(255,202,100,.5)');aura.addColorStop(.44,'rgba(255,105,21,.37)');aura.addColorStop(.72,'rgba(216,48,8,.20)');aura.addColorStop(1,'rgba(140,27,0,0)');
+ g.globalAlpha*=pulse;g.fillStyle=aura;g.fillRect(-112,-112,224,224);
+ for(let j=0;j<7;j++){const ang=t*.55+j*6.283/7,rad=59+11*Math.sin(t*1.5+j);const xx=Math.cos(ang)*rad,yy=Math.sin(ang)*rad;const glow=g.createRadialGradient(xx,yy,1,xx,yy,35);glow.addColorStop(0,'rgba(255,137,34,.19)');glow.addColorStop(1,'rgba(255,58,0,0)');g.fillStyle=glow;g.fillRect(xx-35,yy-35,70,70);}
+ g.restore();
+ g.shadowColor='rgba(255,108,24,.8)';g.shadowBlur=13*pulse;g.drawImage(raidHero,ax,ay,w,h);g.shadowBlur=0;g.restore()}
  g.save();g.globalAlpha*=reveal;g.textAlign='left';g.textBaseline='middle';const x=167;
  // Staggered cinematic lettering, molten metallic gradients and moving highlights.
- function raidTitle(str,y,size,weight,delay,limit){
+ function raidTitle(str,y,size,weight,delay,limit,silver=false){
    const p=raidEase((t-delay)/.65);if(p<=0)return;
    g.save();g.globalAlpha*=p;g.translate(x+(1-p)*24,y+(1-p)*9);
    let fs=size;do{g.font=weight+' '+fs+'px Georgia, serif';if(g.measureText(str).width<=limit)break;fs--}while(fs>11);
    const w=g.measureText(str).width,shine=(t*0.65)%1.7-.35;
    const grad=g.createLinearGradient(0,-fs*.55,0,fs*.55);
-   grad.addColorStop(0,'#fff9ce');grad.addColorStop(.27,'#ffd36a');grad.addColorStop(.55,'#f99b35');grad.addColorStop(.8,'#ffdd83');grad.addColorStop(1,'#ba4d16');
-   g.shadowColor='rgba(255,91,12,.85)';g.shadowBlur=9+5*Math.sin(t*4);g.lineWidth=2;g.strokeStyle='#54200e';g.strokeText(str,0,0);g.fillStyle=grad;g.fillText(str,0,0);g.shadowBlur=0;
+   if(silver){grad.addColorStop(0,'#ffffff');grad.addColorStop(.27,'#f2f7ff');grad.addColorStop(.55,'#b4c2d4');grad.addColorStop(.8,'#ffffff');grad.addColorStop(1,'#8d9caf');}else{grad.addColorStop(0,'#fff9ce');grad.addColorStop(.27,'#ffd36a');grad.addColorStop(.55,'#f99b35');grad.addColorStop(.8,'#ffdd83');grad.addColorStop(1,'#ba4d16');}
+   g.shadowColor=silver?'rgba(207,226,255,.65)':'rgba(255,91,12,.85)';g.shadowBlur=9+5*Math.sin(t*4);g.lineWidth=2;g.strokeStyle=silver?'#344052':'#54200e';g.strokeText(str,0,0);g.fillStyle=grad;g.fillText(str,0,0);g.shadowBlur=0;
    if(w>0){const sweep=g.createLinearGradient((shine-.24)*w,0,(shine+.24)*w,0);sweep.addColorStop(0,'rgba(255,255,255,0)');sweep.addColorStop(.5,'rgba(255,255,230,.85)');sweep.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=sweep;g.fillText(str,0,0);}
    g.restore();
  }
  // Organic incandescent ash: tapered irregular flakes with soft radial halos.
  g.save();
  const ashAlpha=g.globalAlpha;
- for(let i=0;i<29;i++){
+ for(let i=0;i<58;i++){
    const phase=(t*(.13+(i%7)*.023)+i*.137)%1;
-   const px=x+((i*73)%272)+Math.sin(phase*5+i)*12+phase*18;
+   const px=x-100+((i*73)%372)+Math.sin(phase*5+i)*12+phase*18;
    const py=178-phase*(112+(i%5)*9);
    const life=Math.sin(phase*Math.PI), flicker=.72+.28*Math.sin(t*(5+i%4)+i*2.3);
    const radius=.65+(i%5)*.26, heat=Math.pow(1-phase,.65);
@@ -423,7 +431,7 @@ function raidFrame(now){
  }
  g.restore();
  raidTitle('NUEVA RAID',65,22,'bold',.25,260);
- raidTitle(username,100,34,'bold',.65,270);
+ raidTitle(username,100,34,'bold',.65,270,true);
  const line=raidEase((t-.95)/.7);g.save();g.globalAlpha*=line;const beam=g.createLinearGradient(x,0,x+260,0);beam.addColorStop(0,'#ff7c23');beam.addColorStop(.5,'#fff3b1');beam.addColorStop(1,'rgba(255,121,30,0)');g.fillStyle=beam;g.shadowColor='#ff741c';g.shadowBlur=8;g.fillRect(x,121,260*line,2);g.restore();
  raidTitle(bitAmount===null?'Tu comunidad está aquí':bitAmount+(bitAmount===1?' espectador':' espectadores'),142,19,'bold',1.05,270);
  g.save();g.globalAlpha*=raidEase((t-1.45)/.65);g.font='italic 13px Georgia, serif';g.fillStyle='#ffe0b3';g.fillText('Gracias por compartir tu comunidad',x,166);g.restore();

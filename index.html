@@ -391,16 +391,16 @@ function raidFrame(now){
  const bg=g.createLinearGradient(65,0,460,0);bg.addColorStop(0,'transparent');bg.addColorStop(.26,'rgba(15,12,18,.91)');bg.addColorStop(.86,'rgba(15,12,18,.88)');bg.addColorStop(1,'transparent');g.fillStyle=bg;g.fillRect(65,49,395,132);
  if(raidHero.complete&&raidHero.naturalWidth){g.save();g.globalAlpha*=intro;const h=264,w=h*raidHero.naturalWidth/raidHero.naturalHeight,ax=23,ay=-27;
  const pulse=.90+.10*Math.sin(t*3.4);
- // Moderate silhouette rim, rendered behind the untouched avatar.
+ // Diffused silhouette backlight only: no solid stroke or visible mask.
  const rim=raidRimCanvas;const rw=Math.ceil(w)+48,rh=h+48;
  if(rim.width!==rw||rim.height!==rh||!raidRimReady){
-   rim.width=rw;rim.height=rh;const rg=rim.getContext('2d');rg.clearRect(0,0,rw,rh);
-   for(let j=0;j<24;j++){const ang=j*Math.PI/12;rg.drawImage(raidHero,24+Math.cos(ang)*3.6,24+Math.sin(ang)*3.6,w,h);}
-   rg.globalCompositeOperation='source-in';rg.fillStyle='#ffd18a';rg.fillRect(0,0,rw,rh);
-   rg.globalCompositeOperation='destination-out';rg.drawImage(raidHero,24,24,w,h);
+   rim.width=rw;rim.height=rh;const rg=rim.getContext('2d');
+   rg.clearRect(0,0,rw,rh);rg.drawImage(raidHero,24,24,w,h);
+   rg.globalCompositeOperation='source-in';rg.fillStyle='#ffba65';rg.fillRect(0,0,rw,rh);
    rg.globalCompositeOperation='source-over';raidRimReady=true;
  }
- g.save();g.globalAlpha*=.82*pulse;g.shadowColor='rgba(255,121,25,.88)';g.shadowBlur=13;g.drawImage(rim,ax-24,ay-24);g.shadowBlur=0;g.restore();
+ g.save();g.globalAlpha*=.85*pulse;g.filter='blur(5px)';g.drawImage(rim,ax-24,ay-24);g.restore();
+ g.save();g.globalAlpha*=.46*pulse;g.filter='blur(10px)';g.drawImage(rim,ax-24,ay-24);g.restore();
  g.drawImage(raidHero,ax,ay,w,h);g.restore()}
  g.save();g.globalAlpha*=reveal;g.textAlign='left';g.textBaseline='middle';const x=167;
  // Staggered cinematic lettering, molten metallic gradients and moving highlights.

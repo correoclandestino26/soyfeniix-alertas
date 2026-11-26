@@ -373,68 +373,62 @@ const backgroundMusic=new Audio('https://correoclandestino26.github.io/soyfeniix
 function sound(){fireAudioPhase=0;backgroundMusic.pause();backgroundMusic.currentTime=0;if(!muted)backgroundMusic.play().catch(error=>console.warn('[SoyFeniix audio] backgroundMusic',error.name,error.message,'overlay='+!preview,'autoplay permitido='+((document.permissionsPolicy||document.featurePolicy)?.allowsFeature('autoplay')??'desconocido')));clearTimeout(phoenixTimer);phoenixAudio.pause();phoenixAudio.currentTime=0;followAudio.pause();followAudio.currentTime=0;followAudio.volume=electricVolume;if(muted)return;followAudio.play().catch(error=>console.warn('[SoyFeniix audio] followAudio',error.name,error.message,'overlay='+!preview,'autoplay permitido='+((document.permissionsPolicy||document.featurePolicy)?.allowsFeature('autoplay')??'desconocido')));phoenixTimer=setTimeout(()=>{if(!muted)phoenixAudio.play().catch(error=>console.warn('[SoyFeniix audio] phoenixAudio',error.name,error.message,'overlay='+!preview,'autoplay permitido='+((document.permissionsPolicy||document.featurePolicy)?.allowsFeature('autoplay')??'desconocido')));},Math.round((FIRE+.75)*1000));}
 
 
-// RAID: independent cinematic reveal, using the original brand artwork.
 
-/* RAID — arrival through a living solar breach. Independent procedural artwork. */
-const raidHash=n=>{let x=Math.sin(n*127.1+311.7)*43758.5453123;return x-Math.floor(x)};
+/* RAID — the assembly. Custom engraved concert-poster aesthetic, no shared art or effects. */
+const raidTrack=new Audio('https://correoclandestino26.github.io/soyfeniix-alertas/metallica-unforgiven.mp3');
+raidTrack.preload='auto';raidTrack.volume=.12;
+const raidLimit=x=>Math.min(1,Math.max(0,x)),raidEase=x=>{x=raidLimit(x);return x*x*(3-2*x)};
+const raidRandom=i=>{const x=Math.sin(i*91.773+12.7)*43758.5453;return x-Math.floor(x)};
+const raidArt=document.createElement('canvas');raidArt.width=1100;raidArt.height=560;
+(function(){
+ const p=raidArt.getContext('2d');
+ // An engraved live-concert crowd, hand constructed from individual silhouettes.
+ for(let row=0;row<5;row++){
+  const n=15-row*2;
+  for(let i=0;i<n;i++){
+   const k=row*100+i,x=90+i*920/(n-1)+(raidRandom(k)-.5)*28,y=270+row*36+raidRandom(k+1)*19,z=.48+row*.22+raidRandom(k+3)*.22;
+   p.save();p.translate(x,y);p.scale(z,z);
+   p.fillStyle=['#33504d','#263b39','#1d3030','#162625','#0e191b'][row];p.strokeStyle=['#72988a','#55796d','#527b70','#6c9682','#8eb39d'][row];p.lineWidth=1.15;
+   p.beginPath();p.moveTo(-35,77);p.quadraticCurveTo(-29,10,-16,1);p.quadraticCurveTo(-23,-13,-15,-32);p.bezierCurveTo(-4,-44,17,-40,20,-24);p.quadraticCurveTo(24,-8,13,1);p.quadraticCurveTo(31,10,36,77);p.closePath();p.fill();p.stroke();
+   if(raidRandom(k+6)>.4){let d=raidRandom(k+7)>.5?1:-1;p.beginPath();p.moveTo(d*22,34);p.quadraticCurveTo(d*43,0,d*35,-30);p.lineTo(d*29,-62);p.quadraticCurveTo(d*29,-69,d*35,-67);p.lineTo(d*42,-38);p.quadraticCurveTo(d*52,-4,d*35,46);p.closePath();p.fill();p.stroke();}
+   p.globalAlpha=.28;for(let j=0;j<10;j++){p.beginPath();p.moveTo(-20+j*4,19);p.lineTo(-28+j*5,63);p.stroke();}p.restore();
+  }
+ }
+ // Texture on the crowd only, calculated once.
+ p.globalCompositeOperation='source-atop';for(let i=0;i<17000;i++){p.fillStyle=i%2?'rgba(187,215,195,.10)':'rgba(0,0,0,.18)';p.fillRect(raidRandom(i*3+901)*1100,raidRandom(i*3+902)*560,1.2,.7);}
+ p.globalCompositeOperation='destination-in';const mask=p.createLinearGradient(0,240,0,540);mask.addColorStop(0,'transparent');mask.addColorStop(.24,'#fff');mask.addColorStop(.73,'#fff');mask.addColorStop(1,'transparent');p.fillStyle=mask;p.fillRect(0,0,1100,560);
+})();
 function raidFrame(now){
  if(start<0||alertType!=='raid')return;
  const t=(now-start)/1000,T=8.5;
  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);
- if(t>=T){followAudio.pause();start=-1;testButtons.forEach(b=>b.disabled=false);return}
+ if(t>=T){raidTrack.pause();raidTrack.currentTime=0;start=-1;testButtons.forEach(btn=>btn.disabled=false);return}
  requestAnimationFrame(raidFrame);
+ if(muted)raidTrack.volume=0;else raidTrack.volume=.12*(1-raidEase((t-7.2)/1.3));
  const s=Math.min(c.width/1100,c.height/560);g.translate((c.width-1100*s)/2,(c.height-560*s)/2);g.scale(s,s);
- const open=smooth(t/1.45)*(1-smooth((t-7.15)/1.35)),fade=1-smooth((t-7.4)/1.1),cx=350,cy=276;
- g.save();g.globalAlpha=fade;
- // Volumetric, uneven plasma aperture: hundreds of overlapping wisps, not solid shapes.
- g.save();g.globalCompositeOperation='lighter';
- for(let i=0;i<210;i++){
-  const a=i/210*Math.PI*2+t*.16, n=raidHash(i+4), v=raidHash(i+216);
-  const radius=(119+17*Math.sin(a*7+t*3)+9*Math.sin(a*13-t*2))*open;
-  const x=cx+Math.cos(a)*radius*.73,y=cy+Math.sin(a)*radius*1.4;
-  const q=13+v*32;
-  const h=g.createRadialGradient(x,y,0,x,y,q);
-  h.addColorStop(0,i%5===0?'rgba(177,93,255,.18)':'rgba(255,137,43,.15)');
-  h.addColorStop(.3,i%5===0?'rgba(94,39,205,.10)':'rgba(212,52,12,.10)');h.addColorStop(1,'rgba(0,0,0,0)');
-  g.globalAlpha=fade*open*(.4+n*.6);g.fillStyle=h;g.fillRect(x-q,y-q,q*2,q*2);
+ const appear=raidEase(t/.85),end=1-raidEase((t-7.3)/1.2),pop=raidEase((t-.65)/1.1);
+ g.save();g.globalAlpha=appear*end;
+ // Three stage spotlights, deliberately restrained and inexpensive to render.
+ for(let i=0;i<3;i++){
+  const x=180+i*370+Math.sin(t*.85+i*2)*65;
+  const beam=g.createLinearGradient(x,25,x,460);beam.addColorStop(0,'rgba(173,222,196,.22)');beam.addColorStop(1,'rgba(64,113,104,0)');
+  g.fillStyle=beam;g.beginPath();g.moveTo(x-7,27);g.lineTo(x-185,460);g.lineTo(x+185,460);g.lineTo(x+7,27);g.fill();
  }
- // Turbulent filaments have an incandescent core and broad colored scattering.
- for(let k=0;k<24;k++){
-  const a0=k*2.39996+t*.22,span=.42+raidHash(k+19)*1.2;
-  g.beginPath();
-  for(let j=0;j<=65;j++){const a=a0+span*j/65,rad=(120+7*k/24+9*Math.sin(a*8+t*3+k*.2)+5*Math.sin(a*21-t*4))*open;
-   const x=cx+Math.cos(a)*rad*.73,y=cy+Math.sin(a)*rad*1.4;if(j===0)g.moveTo(x,y);else g.lineTo(x,y);}
-  g.globalAlpha=fade*open*(.13+raidHash(k+8)*.35);g.strokeStyle=k%4===0?'#ab70ff':'#ff6727';g.lineWidth=3.6;g.shadowColor=g.strokeStyle;g.shadowBlur=18;g.stroke();
-  g.globalAlpha*=.65;g.strokeStyle='#fff0c6';g.lineWidth=.65;g.shadowBlur=2;g.stroke();
- }
- g.restore();
- // Perspective procession: individual living light signatures emerge from the breach.
- g.save();g.globalCompositeOperation='lighter';
- for(let i=0;i<155;i++){
-  const seed=i*17+7,delay=.55+raidHash(seed)*3.3,p=(t-delay)/(1.35+raidHash(seed+2)*1.9);
-  if(p<0||p>1)continue;
-  const lane=raidHash(seed+3)*2-1,side=raidHash(seed+5)*2-1;
-  const pos=u=>{u=cl(u);let d=u*u;return [cx+side*18+u*150+d*430,cy+lane*(15+145*d)+Math.sin(u*4+seed)*12*u];};
-  const pt=pos(p),opacity=Math.sin(Math.PI*p)*fade,rad=(1.5+6*p)*(.5+raidHash(seed+8));
-  g.globalAlpha=opacity*.65;g.strokeStyle=i%4===0?'#c28aff':'#ff9b4a';g.lineWidth=rad*.45;g.shadowColor=g.strokeStyle;g.shadowBlur=rad*2;g.beginPath();
-  for(let j=10;j>=0;j--){const a=pos(p-j*.009);if(j===10)g.moveTo(...a);else g.lineTo(...a)}g.stroke();
-  const h=g.createRadialGradient(pt[0],pt[1],0,pt[0],pt[1],rad*3);h.addColorStop(0,'#fff9df');h.addColorStop(.15,i%4===0?'#d5aaff':'#ffd091');h.addColorStop(1,'transparent');g.fillStyle=h;g.fillRect(pt[0]-rad*3,pt[1]-rad*3,rad*6,rad*6);
- }
- g.restore();
- // A physical-looking metallic title, illuminated by the breach, with no box.
- const a=smooth((t-1.55)/.75)*fade;
- g.save();g.globalAlpha=a;g.translate(0,(1-a)*10);g.textAlign='center';g.textBaseline='middle';
- const tx=720;
- const haze=g.createRadialGradient(tx,280,35,tx,280,300);haze.addColorStop(0,'rgba(10,5,19,.92)');haze.addColorStop(.55,'rgba(10,5,19,.75)');haze.addColorStop(1,'transparent');g.fillStyle=haze;g.fillRect(tx-300,-20,600,600);
- const type=(label,y,size,weight,gold)=>{g.font=weight+' '+size+'px Arial';const grad=g.createLinearGradient(0,y-size*.5,0,y+size*.5);grad.addColorStop(0,'#fffaf0');grad.addColorStop(.42,gold?'#ffc878':'#e4e8f1');grad.addColorStop(.51,gold?'#aa4f18':'#777d92');grad.addColorStop(.7,gold?'#ffc36d':'#f9f8ff');grad.addColorStop(1,gold?'#e48431':'#c1bfd6');g.fillStyle=grad;g.shadowColor='#000';g.shadowBlur=9;g.fillText(label,tx,y);g.shadowBlur=0;};
- type('RAID ENTRANTE',160,24,800,true);
- let fs=62;do{g.font='900 '+fs+'px Arial';if(g.measureText(username).width<555)break;fs-=2}while(fs>14);type(username,222,fs,900,false);
- type(bitAmount===null?'UNA NUEVA COMUNIDAD':bitAmount+(bitAmount===1?' ESPECTADOR':' ESPECTADORES'),310,bitAmount===null?23:33,900,true);
- g.font='500 23px Arial';g.fillStyle='#f0e2ff';g.fillText('Gracias por compartir tu comunidad',tx,367);
- g.font='700 19px Arial';g.fillStyle='#ffd6a1';g.fillText('BIENVENIDOS A SOYFENIIX',tx,405);
+ g.save();g.globalAlpha*=pop;g.translate(0,45*(1-pop));g.drawImage(raidArt,0,0);g.restore();
+ const z=raidEase((t-1.25)/.7);
+ g.save();g.globalAlpha*=z;g.translate(0,-16*(1-z));g.textAlign='center';g.textBaseline='middle';
+ // Editorial serif typography and bone-white ink, with a restrained jade accent.
+ g.font='600 21px Georgia, serif';g.fillStyle='#a9cbbc';g.fillText('U N A   N U E V A   A L I A N Z A',550,91);
+ let fs=68;do{g.font='bold '+fs+'px Georgia, serif';if(g.measureText(username).width<=910)break;fs-=2}while(fs>15);
+ g.lineJoin='round';g.strokeStyle='#101c1c';g.lineWidth=6;g.strokeText(username,550,162);g.fillStyle='#eee9d8';g.fillText(username,550,162);
+ g.font='italic 27px Georgia, serif';g.fillStyle='#bdcebf';g.fillText('ha abierto el camino',550,220);
+ const count=bitAmount===null?'LA COMUNIDAD CRECE':String(bitAmount);
+ g.font=bitAmount===null?'bold 27px Georgia, serif':'bold 78px Georgia, serif';g.strokeStyle='#132324';g.lineWidth=7;g.strokeText(count,550,299);g.fillStyle='#d9e9cb';g.fillText(count,550,299);
+ g.font='600 19px Georgia, serif';g.fillStyle='#dce6d9';g.fillText(bitAmount===null?'':bitAmount===1?'PERSONA SE UNE A NOSOTROS':'PERSONAS SE UNEN A NOSOTROS',550,354);
+ g.font='italic 26px Georgia, serif';g.strokeStyle='#101c1c';g.lineWidth=4;g.strokeText('Gracias por hacer crecer esta comunidad.',550,427);g.fillStyle='#f2ebd8';g.fillText('Gracias por hacer crecer esta comunidad.',550,427);
  g.restore();g.restore();
 }
-function startRaid(){backgroundMusic.pause();phoenixAudio.pause();clearTimeout(phoenixTimer);followAudio.pause();followAudio.currentTime=0;followAudio.volume=electricVolume;if(!muted)followAudio.play().catch(()=>{});requestAnimationFrame(raidFrame);}
+function startRaid(){backgroundMusic.pause();phoenixAudio.pause();followAudio.pause();clearTimeout(phoenixTimer);raidTrack.pause();raidTrack.currentTime=0;raidTrack.volume=.12;if(!muted)raidTrack.play().catch(e=>console.warn('[Raid audio]',e));requestAnimationFrame(raidFrame);}
 
 function play(name,type='follow',amount=null){bitAmount=amount!==null&&amount!==''&&Number.isSafeInteger(Number(amount))&&Number(amount)>0?Number(amount):null;alertType=Object.prototype.hasOwnProperty.call(alertLabels,type)?type:'follow';textBurnTiles=null;username=String(name||Q.get('name')||who.value||'NuevoSeguidor').slice(0,40);start=performance.now();testButtons.forEach(btn=>btn.disabled=true);if(alertType==='sub'){startSub();}else if(alertType==='raid'){startRaid();}else{sound();requestLegacyFrame();}}window.playFollow=play;b.onclick=()=>play(who.value);document.querySelector('#playSub').onclick=()=>{if(subArtReady())play(who.value,'sub');else if(!subArt.complete)subArt.addEventListener('load',()=>{if(start<0)play(who.value,'sub')},{once:true});};document.querySelector('#playBits').onclick=()=>play(who.value,'bits',30);document.querySelector('#playRaid').onclick=()=>play(who.value,'raid',20);let m=document.querySelector('#mute');function muteLabel(){m.textContent='Sonido: '+(muted?'no':'sí')}m.onclick=()=>{muted=!muted;subMusic.muted=muted;muteLabel()};muteLabel();const eventQueue=window.__soyFeniixPending||[];window.__soyFeniixPending=eventQueue;let widgetBusy=false;
 function drainAlerts(){if(widgetBusy||!ready||start>=0||!eventQueue.length)return;if(eventQueue[0].type==='sub'&&!subArt.complete)return;const a=eventQueue.shift();widgetBusy=true;play(a.name,a.type,a.amount);setTimeout(()=>{backgroundMusic.pause();phoenixAudio.pause();followAudio.pause();widgetBusy=false;drainAlerts();},11000);}

@@ -11,7 +11,7 @@ root.innerHTML="<canvas id=\"scene\"></canvas><div id=\"subStage\" aria-hidden=\
 const css=`
 #subStage{position:fixed;inset:0;display:none;align-items:center;justify-content:center;pointer-events:none}
 #subStage.active{display:flex}
-#subMotion{position:relative;width:min(67.5vw,112.5vh,660px);aspect-ratio:1672/941;isolation:isolate}
+#subMotion{position:relative;width:min(72vw,120vh,704px);aspect-ratio:1672/941;isolation:isolate}
 #subArtDom{display:block;width:100%;height:100%;object-fit:contain;opacity:0}
 #subStage.active #subArtDom{animation:subArtIn 1.2s ease-out both}
 @keyframes subArtIn{0%,12%{opacity:0}34%{opacity:.32}58%{opacity:.78}100%{opacity:1}}

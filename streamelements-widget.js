@@ -11,7 +11,7 @@ root.innerHTML="<canvas id=\"scene\"></canvas><div id=\"subStage\" aria-hidden=\
 const css=`
 #subStage{position:fixed;inset:0;display:none;align-items:center;justify-content:center;pointer-events:none}
 #subStage.active{display:flex}
-#subMotion{position:relative;width:min(90vw,150vh,880px);aspect-ratio:1672/941;isolation:isolate}
+#subMotion{position:relative;width:min(76.5vw,127.5vh,748px);aspect-ratio:1672/941;isolation:isolate}
 #subArtDom{display:block;width:100%;height:100%;object-fit:contain;opacity:0}
 #subStage.active #subArtDom{animation:subArtIn 1.2s ease-out both}
 @keyframes subArtIn{0%,12%{opacity:0}34%{opacity:.32}58%{opacity:.78}100%{opacity:1}}
@@ -432,7 +432,7 @@ function raidFrame(now){
  requestAnimationFrame(raidFrame);raidTrack.volume=muted?0:.10*(1-raidEase((t-7.2)/1.3));
  const s=Math.min(c.width/1100,c.height/560);g.translate((c.width-1100*s)/2,(c.height-560*s)/2);g.scale(s,s);
  const intro=raidEase(t/.8),out=1-raidEase((t-7.25)/1.25),reveal=raidEase((t-.35)/.85);
- g.save();g.translate(550-230,90+(1-intro)*22);g.globalAlpha=intro*out;
+ g.save();g.translate(550-230,90+(1-intro)*22);g.translate(230,105);g.scale(1.35,1.35);g.translate(-230,-105);g.globalAlpha=intro*out;
  // One shared baseline and a softly vanishing local background, no secondary artwork.
  const bg=g.createLinearGradient(65,0,460,0);bg.addColorStop(0,'transparent');bg.addColorStop(.26,'rgba(15,12,18,.91)');bg.addColorStop(.86,'rgba(15,12,18,.88)');bg.addColorStop(1,'transparent');g.fillStyle=bg;g.fillRect(65,49,395,132);
  if(raidHero.complete&&raidHero.naturalWidth){g.save();g.globalAlpha*=intro;const h=210,w=h*raidHero.naturalWidth/raidHero.naturalHeight;g.drawImage(raidHero,6,0,w,h);g.restore()}

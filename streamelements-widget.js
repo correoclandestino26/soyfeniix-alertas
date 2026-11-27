@@ -381,8 +381,25 @@ function playAlertAudio(media,label){
  });
 }
 function retryBlockedAlertAudio(){for(const [media,pending] of blockedAlertAudio){blockedAlertAudio.delete(media);if(!muted&&start>=0&&start===pending.token)playAlertAudio(media,pending.label);}}
-document.addEventListener('pointerdown',retryBlockedAlertAudio,true);
-document.addEventListener('keydown',retryBlockedAlertAudio,true);
+// Prime each persistent media element during a real user activation, before alerts.
+const primedAlertMedia=new WeakSet();
+function activateAlertAudio(event){
+ if(!event.isTrusted||muted)return;
+ retryBlockedAlertAudio();
+ if(start>=0)return;
+ for(const media of [subMusic,backgroundMusic,followAudio,phoenixAudio,raidTrack]){
+  if(primedAlertMedia.has(media)||!media.paused)continue;
+  const previousVolume=media.volume,previousTime=media.currentTime;
+  media.volume=0;media.muted=false;
+  const pending=media.play();
+  Promise.resolve(pending).then(()=>{
+   primedAlertMedia.add(media);
+   if(start<0){media.pause();media.volume=previousVolume;try{media.currentTime=previousTime;}catch(_){}}
+  }).catch(()=>{if(start<0)media.volume=previousVolume;});
+ }
+}
+document.addEventListener('click',activateAlertAudio,true);
+document.addEventListener('keydown',activateAlertAudio,true);
 function sound(){fireAudioPhase=0;backgroundMusic.pause();backgroundMusic.currentTime=0;if(!muted)playAlertAudio(backgroundMusic,'backgroundMusic');clearTimeout(phoenixTimer);phoenixAudio.pause();phoenixAudio.currentTime=0;followAudio.pause();followAudio.currentTime=0;followAudio.volume=electricVolume;if(muted)return;playAlertAudio(followAudio,'followAudio');phoenixTimer=setTimeout(()=>{if(!muted)playAlertAudio(phoenixAudio,'phoenixAudio');},Math.round((FIRE+.75)*1000));}
 
 

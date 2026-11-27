@@ -377,29 +377,39 @@ function playAlertAudio(media,label){
  media.muted=false;const token=start;
  return media.play().then(()=>blockedAlertAudio.delete(media)).catch(error=>{
  console.warn('[SoyFeniix audio]',label,error.name,error.message,'autoplay:',(document.permissionsPolicy||document.featurePolicy)?.allowsFeature('autoplay'));
- if(error.name==='NotAllowedError'&&start===token&&start>=0)blockedAlertAudio.set(media,{token,label});
+ if(error.name==='NotAllowedError'&&start===token&&start>=0){blockedAlertAudio.set(media,{token,label});audioGate.style.display='block';audioGate.textContent='Activar audio';}
  });
 }
 function retryBlockedAlertAudio(){for(const [media,pending] of blockedAlertAudio){blockedAlertAudio.delete(media);if(!muted&&start>=0&&start===pending.token)playAlertAudio(media,pending.label);}}
 // Prime each persistent media element during a real user activation, before alerts.
+// Explicit activation control, visible only when playback is actually blocked.
+const audioGate=document.createElement('button');
+audioGate.type='button';audioGate.textContent='Activar audio';
+audioGate.style.cssText='position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:2147483647;padding:9px 16px;border:1px solid #777;border-radius:8px;background:#20232b;color:white;font:14px system-ui;cursor:pointer;display:none;pointer-events:auto';
+document.body.appendChild(audioGate);
 const primedAlertMedia=new WeakSet();
-function activateAlertAudio(event){
- if(!event.isTrusted||muted)return;
- retryBlockedAlertAudio();
- if(start>=0)return;
- for(const media of [subMusic,backgroundMusic,followAudio,phoenixAudio,raidTrack]){
-  if(primedAlertMedia.has(media)||!media.paused)continue;
-  const previousVolume=media.volume,previousTime=media.currentTime;
-  media.volume=0;media.muted=false;
-  const pending=media.play();
-  Promise.resolve(pending).then(()=>{
+let primingAudio=false;
+async function activateAlertAudio(event){
+ if(!event.isTrusted||muted||primingAudio)return;
+ if(start>=0){audioGate.textContent='Activar audio al terminar';return;}
+ primingAudio=true;
+ const mediaList=[subMusic,backgroundMusic,followAudio,phoenixAudio,raidTrack];
+ const results=await Promise.all(mediaList.map(async media=>{
+  if(primedAlertMedia.has(media))return true;
+  const volume=media.volume,time=media.currentTime;
+  try{
+   media.volume=0;media.muted=false;
+   await media.play();
    primedAlertMedia.add(media);
-   if(start<0){media.pause();media.volume=previousVolume;try{media.currentTime=previousTime;}catch(_){}}
-  }).catch(()=>{if(start<0)media.volume=previousVolume;});
- }
+   return true;
+  }catch(error){console.warn('[SoyFeniix activation]',error.name,error.message);return false;}
+  finally{media.pause();media.volume=volume;try{media.currentTime=time;}catch(_){}}
+ }));
+ primingAudio=false;
+ audioGate.style.display=results.every(Boolean)?'none':'block';
+ audioGate.textContent=results.every(Boolean)?'Audio activado':'Reintentar activar audio';
 }
-document.addEventListener('click',activateAlertAudio,true);
-document.addEventListener('keydown',activateAlertAudio,true);
+audioGate.addEventListener('click',activateAlertAudio);
 function sound(){fireAudioPhase=0;backgroundMusic.pause();backgroundMusic.currentTime=0;if(!muted)playAlertAudio(backgroundMusic,'backgroundMusic');clearTimeout(phoenixTimer);phoenixAudio.pause();phoenixAudio.currentTime=0;followAudio.pause();followAudio.currentTime=0;followAudio.volume=electricVolume;if(muted)return;playAlertAudio(followAudio,'followAudio');phoenixTimer=setTimeout(()=>{if(!muted)playAlertAudio(phoenixAudio,'phoenixAudio');},Math.round((FIRE+.75)*1000));}
 
 
@@ -435,7 +445,7 @@ function raidFrame(now){
 function startRaid(){backgroundMusic.pause();phoenixAudio.pause();followAudio.pause();clearTimeout(phoenixTimer);raidTrack.pause();raidTrack.currentTime=0;raidTrack.volume=.10;if(!muted)playAlertAudio(raidTrack,'raidTrack');requestAnimationFrame(raidFrame);}
 
 function play(name,type='follow',amount=null){bitAmount=amount!==null&&amount!==''&&Number.isSafeInteger(Number(amount))&&Number(amount)>0?Number(amount):null;alertType=Object.prototype.hasOwnProperty.call(alertLabels,type)?type:'follow';blockedAlertAudio.clear();textBurnTiles=null;username=String(name||Q.get('name')||who.value||'NuevoSeguidor').slice(0,40);start=performance.now();testButtons.forEach(btn=>btn.disabled=true);if(alertType==='sub'){startSub();}else if(alertType==='raid'){startRaid();}else{sound();requestLegacyFrame();}}window.playFollow=play;b.onclick=()=>play(who.value);document.querySelector('#playSub').onclick=()=>{if(subArtReady())play(who.value,'sub');else if(!subArt.complete)subArt.addEventListener('load',()=>{if(start<0)play(who.value,'sub')},{once:true});};document.querySelector('#playBits').onclick=()=>play(who.value,'bits',30);document.querySelector('#playRaid').onclick=()=>play(who.value,'raid',20);let m=document.querySelector('#mute');function muteLabel(){m.textContent='Sonido: '+(muted?'no':'sí')}m.onclick=()=>{muted=!muted;[subMusic,backgroundMusic,followAudio,phoenixAudio,raidTrack].forEach(media=>media.muted=muted);if(muted)blockedAlertAudio.clear();muteLabel()};muteLabel();const eventQueue=window.__soyFeniixPending||[];window.__soyFeniixPending=eventQueue;let widgetBusy=false;
-function drainAlerts(){if(widgetBusy||!ready||start>=0||!eventQueue.length)return;if(eventQueue[0].type==='sub'&&!subArt.complete)return;const a=eventQueue.shift();widgetBusy=true;play(a.name,a.type,a.amount);setTimeout(()=>{backgroundMusic.pause();phoenixAudio.pause();followAudio.pause();widgetBusy=false;drainAlerts();},11000);}
+function drainAlerts(){if(primingAudio||widgetBusy||!ready||start>=0||!eventQueue.length)return;if(eventQueue[0].type==='sub'&&!subArt.complete)return;const a=eventQueue.shift();widgetBusy=true;play(a.name,a.type,a.amount);setTimeout(()=>{backgroundMusic.pause();phoenixAudio.pause();followAudio.pause();widgetBusy=false;drainAlerts();},11000);}
 setInterval(drainAlerts,100);drainAlerts();
 })();
 })();

@@ -385,8 +385,8 @@ function retryBlockedAlertAudio(){for(const [media,pending] of blockedAlertAudio
 // Explicit activation control, visible only when playback is actually blocked.
 const audioGate=document.createElement('button');
 audioGate.type='button';audioGate.textContent='Activar audio';
-audioGate.style.cssText='position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:2147483647;padding:9px 16px;border:1px solid #777;border-radius:8px;background:#20232b;color:white;font:14px system-ui;cursor:pointer;display:none;pointer-events:auto';
-document.body.appendChild(audioGate);
+audioGate.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2147483647;padding:14px 24px;border:2px solid white;border-radius:8px;background:#20232b;color:white;font:bold 18px system-ui;cursor:pointer;display:block;pointer-events:auto';
+root.appendChild(audioGate);
 const primedAlertMedia=new WeakSet();
 let primingAudio=false;
 async function activateAlertAudio(event){

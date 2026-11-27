@@ -377,16 +377,18 @@ function playAlertAudio(media,label){
  media.muted=false;const token=start;
  return media.play().then(()=>blockedAlertAudio.delete(media)).catch(error=>{
  console.warn('[SoyFeniix audio]',label,error.name,error.message,'autoplay:',(document.permissionsPolicy||document.featurePolicy)?.allowsFeature('autoplay'));
- if(error.name==='NotAllowedError'&&start===token&&start>=0){blockedAlertAudio.set(media,{token,label});audioGate.style.display='block';audioGate.textContent='Activar audio';}
+ if(error.name==='NotAllowedError'&&start===token&&start>=0){blockedAlertAudio.set(media,{token,label});if(!isObsBrowser){audioGate.style.display='block';audioGate.textContent='Activar audio';}}
  });
 }
 function retryBlockedAlertAudio(){for(const [media,pending] of blockedAlertAudio){blockedAlertAudio.delete(media);if(!muted&&start>=0&&start===pending.token)playAlertAudio(media,pending.label);}}
 // Prime each persistent media element during a real user activation, before alerts.
 // Explicit activation control, visible only when playback is actually blocked.
+const isObsBrowser=!!window.obsstudio || /OBS(?:\/|\b)|OBSBrowser/i.test(navigator.userAgent);
 const audioGate=document.createElement('button');
+audioGate.id='soyfeniix-audio-gate';
 audioGate.type='button';audioGate.textContent='Activar audio';
 audioGate.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2147483647;padding:14px 24px;border:2px solid white;border-radius:8px;background:#20232b;color:white;font:bold 18px system-ui;cursor:pointer;display:block;pointer-events:auto';
-root.appendChild(audioGate);
+if(!isObsBrowser)root.appendChild(audioGate);
 const primedAlertMedia=new WeakSet();
 let primingAudio=false;
 async function activateAlertAudio(event){
